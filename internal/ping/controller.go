@@ -1,0 +1,16 @@
+package ping
+
+import (
+	"poseidon/pkg/http"
+)
+
+type PingController struct {
+}
+
+func NewPingController() *PingController {
+	return &PingController{}
+}
+
+func (c *PingController) Ping(ctx http.Context) {
+	ctx.JSON(200, struct{ Message string }{Message: "pong"})
+}
