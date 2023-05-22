@@ -72,3 +72,7 @@ func (c *Context) Header(key string, def string) string {
 func (c *Context) SetHeader(key string, value string) {
 	c.gctx.Header(key, value)
 }
+
+func (c *Context) OctetStream(code int, data []byte) {
+	c.gctx.Data(code, "application/octet-stream", data)
+}

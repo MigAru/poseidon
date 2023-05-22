@@ -49,13 +49,13 @@ func (c *Controller) CreateUpload(ctx http.Context) error {
 		locationName += "/" + subName
 	}
 
-	uuid := uuid.NewString()
+	id := uuid.NewString()
 
-	ctx.SetHeader("Location", "/v2"+locationName+"/blobs/uploads/"+uuid)
+	ctx.SetHeader("Location", "/manifest.go"+locationName+"/blobs/uploads/"+id)
 	ctx.SetHeader("Range", "bytes=0-0")
 	ctx.SetHeader("Content-Length", "0")
 
-	ctx.SetHeader("Docker-Upload-UUID", uuid)
+	ctx.SetHeader("Docker-Upload-UUID", id)
 	ctx.NoContent(http2.StatusAccepted)
 
 	return nil
@@ -68,7 +68,12 @@ func (c *Controller) Upload(ctx http.Context) error {
 			fmt.Println(ctx.QueryParam("digest"))
 			data, _ := c.blob.Get(ctx.Param("uuid"))
 			c.digest.Create(ctx.Param("name"), ctx.QueryParam("digest"), data)
-
+			ctx.SetHeader("Location", "/manifest.go/"+ctx.Param("name")+"/blobs/uploads/"+ctx.Param("uuid"))
+			ctx.SetHeader("Content-Length", "0")
+			ctx.SetHeader("Range", "0-"+strconv.Itoa(len(data)-1))
+			ctx.SetHeader("Docker-Upload-UUID", ctx.Param("uiid"))
+			ctx.NoContent(201)
+			return nil
 		}
 	}
 
@@ -87,7 +92,7 @@ func (c *Controller) Upload(ctx http.Context) error {
 	if err := c.blob.Create(ctx.Param("uuid"), buffer.Bytes()); err != nil {
 		return err
 	}
-	ctx.SetHeader("Location", "/v2/"+ctx.Param("name")+"/blobs/uploads/"+ctx.Param("uuid"))
+	ctx.SetHeader("Location", "/manifest.go/"+ctx.Param("name")+"/blobs/uploads/"+ctx.Param("uuid"))
 	ctx.SetHeader("Content-Length", "0")
 	ctx.SetHeader("Range", "0-"+strconv.Itoa(buffer.Len()-1))
 	ctx.SetHeader("Docker-Upload-UUID", ctx.Param("uiid"))
@@ -99,4 +104,26 @@ func (c *Controller) DeleteUpload(ctx http.Context) error {
 	return nil
 }
 
-func (c *Controller) Get
+func (c *Controller) Get(ctx http.Context) error {
+	data, err := c.digest.Get(ctx.Param("name"), ctx.Param("digest"))
+	if err != nil {
+		ctx.JSON(404, registry.ErrorResponse{Errors: []registry.Error{
+			{
+				Code:    "BLOB_UPLOAD_UNKNOWN",
+				Message: "blob unknown to registry",
+				Detail:  "This error may be returned when a blob is unknown to the registry in a specified repository. This can be returned with a standard get or if a manifest references an unknown layer during upload."},
+		}})
+		return err
+	}
+	if ctx.Request().Method == http2.MethodHead {
+		ctx.SetHeader("Content-Length", "0")
+		ctx.SetHeader("Docker-Content-Digest", ctx.Param("digest"))
+		ctx.NoContent(http2.StatusOK)
+		return nil
+	}
+	ctx.SetHeader("Content-Length", strconv.Itoa(len(data)))
+	ctx.SetHeader("Docker-Content-Digest", ctx.Param("digest"))
+	ctx.SetHeader("Content-Type", "application/octet-stream")
+	ctx.OctetStream(http2.StatusOK, data)
+	return nil
+}

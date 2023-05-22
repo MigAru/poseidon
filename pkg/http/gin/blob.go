@@ -30,6 +30,6 @@ func (s *Server) registerBlobController(group *gin.RouterGroup, pattern string, 
 
 	// deleting blob
 	group.DELETE(uploadPattern, func(ctx *gin.Context) {
-		controller.Delete(WrapContext(ctx))
+		controller.DeleteUpload(WrapContext(ctx))
 	})
 }

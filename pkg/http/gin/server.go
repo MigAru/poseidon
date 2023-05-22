@@ -2,12 +2,13 @@ package gin
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"net/http"
 	"poseidon/internal/config"
 	"poseidon/internal/ping"
 	"poseidon/internal/registry/base"
 	"poseidon/internal/registry/blob"
-	"poseidon/pkg/registry"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -45,23 +46,15 @@ func (s *Server) registerControllers(ping *ping.PingController, blobController *
 		}
 	})
 	g.HEAD(":name/blobs/:digest", func(ctx *gin.Context) {
-		ctx.JSON(404, registry.ErrorResponse{Errors: []registry.Error{
-			{
-				Code:    "BLOB_UPLOAD_UNKNOWN",
-				Message: "blob unknown to registry",
-				Detail:  "This error may be returned when a blob is unknown to the registry in a specified repository. This can be returned with a standard get or if a manifest references an unknown layer during upload."},
-		}})
+		blobController.Get(WrapContext(ctx))
 	})
 	g.GET(":name/blobs/:digest", func(ctx *gin.Context) {
-
-		ctx.JSON(404, registry.ErrorResponse{Errors: []registry.Error{
-			{
-				Code:    "BLOB_UNKNOWN",
-				Message: "blob unknown to registry",
-				Detail:  "This error may be returned when a blob is unknown to the registry in a specified repository. This can be returned with a standard get or if a manifest references an unknown layer during upload."},
-		}})
+		blobController.Get(WrapContext(ctx))
 	})
-
+	g.PUT(":name/manifests/:tag", func(ctx *gin.Context) {
+		b, _ := io.ReadAll(ctx.Request.Body)
+		fmt.Println(string(b))
+	})
 	s.registerBlobController(g, ":name/blobs/uploads/", blobController)
 }
 

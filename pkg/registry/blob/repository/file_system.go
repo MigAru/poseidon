@@ -1,4 +1,4 @@
-package blob
+package repository
 
 import (
 	"bytes"
@@ -7,23 +7,23 @@ import (
 	"path"
 )
 
-type FileSystemRepository struct {
+type FileSystem struct {
 	basePath string
 }
 
-func NewFileSystemRepository(basePath string) *FileSystemRepository {
+func NewFileSystem(basePath string) *FileSystem {
 	basePath = path.Join(basePath, "blobs")
-	return &FileSystemRepository{basePath: basePath}
+	return &FileSystem{basePath: basePath}
 }
-func (r FileSystemRepository) normalizePath(name string) string {
+func (r FileSystem) normalizePath(name string) string {
 	return path.Join(r.basePath, name)
 }
 
-func (r FileSystemRepository) Get(name string) ([]byte, error) {
+func (r FileSystem) Get(name string) ([]byte, error) {
 	return os.ReadFile(r.normalizePath(name))
 }
 
-func (r FileSystemRepository) Create(name string, data []byte) error {
+func (r FileSystem) Create(name string, data []byte) error {
 	name = r.normalizePath(name)
 	err := os.MkdirAll(r.basePath, 0750)
 	if err != nil && !os.IsExist(err) {
@@ -57,13 +57,13 @@ func fileExist(filename string) bool {
 	return !info.IsDir()
 }
 
-func (r FileSystemRepository) Exist(name string) bool {
+func (r FileSystem) Exist(name string) bool {
 	if _, err := os.Stat(r.normalizePath(name)); err != nil {
 		return false
 	}
 	return true
 }
 
-func (r FileSystemRepository) Delete(name string) error {
+func (r FileSystem) Delete(name string) error {
 	return os.Remove(r.normalizePath(name))
 }

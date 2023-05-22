@@ -1,4 +1,4 @@
-package digest
+package repository
 
 import (
 	"bytes"
@@ -8,21 +8,23 @@ import (
 	"strings"
 )
 
-type FileSystemRepository struct {
+type FileSystem struct {
 	basePath string
 }
 
-func NewFileSystemRepository(basePath string) *FileSystemRepository {
-	basePath = path.Join(basePath, "digest")
-	return &FileSystemRepository{basePath: basePath}
+func NewFileSystem(basePath string) *FileSystem {
+	basePath = path.Join(basePath, "digests")
+	return &FileSystem{basePath: basePath}
 }
 
-func (r FileSystemRepository) Get(project, name string) ([]byte, error) {
-	digestPath := path.Join(r.basePath, project, name[:3], name)
+func (r FileSystem) Get(project, name string) ([]byte, error) {
+	ar := strings.Split(name, ":")
+	algo, hash := ar[0], ar[1]
+	digestPath := path.Join(r.basePath, project, algo, hash[:3], name)
 	return os.ReadFile(digestPath)
 }
 
-func (r FileSystemRepository) Create(project, name string, data []byte) error {
+func (r FileSystem) Create(project, name string, data []byte) error {
 	ar := strings.Split(name, ":")
 	algo, hash := ar[0], ar[1]
 	digestPath := path.Join(r.basePath, project, algo, hash[:3])
@@ -58,12 +60,12 @@ func fileExist(filename string) bool {
 	return !info.IsDir()
 }
 
-func (r FileSystemRepository) Exist(project, name string) error {
+func (r FileSystem) Exist(project, name string) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (r FileSystemRepository) Delete(project, name string) error {
+func (r FileSystem) Delete(project, name string) error {
 	//TODO implement me
 	panic("implement me")
 }
