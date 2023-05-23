@@ -9,7 +9,7 @@ import (
 	http2 "net/http"
 	"poseidon/internal/registry/digest"
 	"poseidon/pkg/http"
-	"poseidon/pkg/registry"
+	"poseidon/pkg/registry/errors"
 	"strconv"
 )
 
@@ -79,7 +79,7 @@ func (c *Controller) Upload(ctx http.Context) error {
 
 	_, err := io.Copy(&buffer, ctx.Body())
 	if err != nil {
-		ctx.JSON(http2.StatusBadRequest, registry.ErrorResponse{Errors: []registry.Error{
+		ctx.JSON(http2.StatusBadRequest, errors.ErrorResponse{Errors: []errors.Error{
 			{
 				Code:    "",
 				Message: "octet-stream error",
@@ -107,7 +107,7 @@ func (c *Controller) DeleteUpload(ctx http.Context) error {
 func (c *Controller) Get(ctx http.Context) error {
 	data, err := c.digest.Get(ctx.Param("name"), ctx.Param("digest"))
 	if err != nil {
-		ctx.JSON(404, registry.ErrorResponse{Errors: []registry.Error{
+		ctx.JSON(404, errors.ErrorResponse{Errors: []errors.Error{
 			{
 				Code:    "BLOB_UPLOAD_UNKNOWN",
 				Message: "blob unknown to registry",

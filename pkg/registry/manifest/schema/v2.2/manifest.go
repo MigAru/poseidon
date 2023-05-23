@@ -1,13 +1,13 @@
-package v2
+package v2_2
 
 type Manifest struct {
 	SchemaVersion string
-	MadiaType     string
+	MediaType     string
 	Config        ManifestConfig
 }
 
 type ManifestConfig struct {
-	MadiaType string
+	MediaType string
 	Digest    string
 	Size      int
 	Layers    []Layer

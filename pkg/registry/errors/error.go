@@ -1,4 +1,4 @@
-package registry
+package errors
 
 type ErrorResponse struct {
 	Errors []Error `json:"errors"`
