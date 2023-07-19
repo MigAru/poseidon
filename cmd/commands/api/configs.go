@@ -1,4 +1,4 @@
-package registry_api
+package api
 
 import (
 	"poseidon/internal/config"

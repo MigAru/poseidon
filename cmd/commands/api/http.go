@@ -1,11 +1,12 @@
-package registry_api
+package api
 
 import (
 	"github.com/google/wire"
 	"github.com/sirupsen/logrus"
 	"poseidon/internal/config"
 	"poseidon/internal/http/gin"
-	manifest2 "poseidon/internal/interfaces/manifest"
+	blobInterface "poseidon/internal/interfaces/blob"
+	manifestInterface "poseidon/internal/interfaces/manifest"
 	"poseidon/internal/ping"
 	"poseidon/internal/registry/base"
 	"poseidon/internal/registry/blob"
@@ -17,8 +18,9 @@ var httpSet = wire.NewSet(
 	ping.NewPingController,
 	base.NewController,
 	blob.NewController,
+	wire.Bind(new(blobInterface.Controller), new(*blob.Controller)),
 	manifest.NewController,
-	wire.Bind(new(manifest2.Controller), new(*manifest.Controller)),
+	wire.Bind(new(manifestInterface.Controller), new(*manifest.Controller)),
 	ServerProvider,
 )
 
@@ -26,9 +28,9 @@ func ServerProvider(
 	cfg *config.Config,
 	log *logrus.Logger,
 	pingController *ping.PingController,
-	blobController *blob.Controller,
+	blobController blobInterface.Controller,
 	baseController *base.Controller,
-	manifestController manifest2.Controller,
+	manifestController manifestInterface.Controller,
 ) http.HttpServer {
 	return gin.NewServer(cfg, log, pingController, blobController, baseController, manifestController)
 }

@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"poseidon/cmd/commands"
-	"poseidon/cmd/commands/registry_api"
+	"poseidon/cmd/commands/api"
 	"poseidon/internal/consts"
 	"syscall"
 
@@ -43,7 +43,7 @@ func main() {
 				fmt.Println("Terminating app...")
 				cancel()
 			}()
-			_, cleanup, err := registry_api.InitializeBackend(c)
+			_, cleanup, err := api.InitializeBackend(c)
 
 			<-ctx.Done()
 

@@ -1,4 +1,4 @@
-package registry_api
+package api
 
 import (
 	"github.com/google/wire"
@@ -20,6 +20,7 @@ var dbSet = wire.NewSet(
 )
 
 func ProvideFileSystemBlobRepository() *repository2.FileSystem {
+	//TODO: сделать переменную в конфиге где прописывается куда складывать файлы
 	return repository2.NewFileSystem("tmp")
 }
 

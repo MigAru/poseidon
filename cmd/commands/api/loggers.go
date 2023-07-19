@@ -1,4 +1,4 @@
-package registry_api
+package api
 
 import (
 	"github.com/google/wire"

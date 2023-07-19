@@ -4,7 +4,7 @@
 //go:build !wireinject
 // +build !wireinject
 
-package registry_api
+package api
 
 import (
 	"github.com/urfave/cli/v2"
