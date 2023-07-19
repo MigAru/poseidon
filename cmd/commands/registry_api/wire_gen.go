@@ -11,6 +11,7 @@ import (
 	"poseidon/internal/ping"
 	"poseidon/internal/registry/base"
 	"poseidon/internal/registry/blob"
+	"poseidon/internal/registry/manifest"
 )
 
 // Injectors from wire.go:
@@ -22,11 +23,13 @@ func InitializeBackend(ctx *cli.Context) (Backend, func(), error) {
 		return Backend{}, nil, err
 	}
 	pingController := ping.NewPingController()
-	fileSystemRepository := ProvideFileSystemBlobRepository()
-	digestFileSystemRepository := ProvideFileSystemDigestRepository()
-	controller := blob.NewController(logger, fileSystemRepository, digestFileSystemRepository)
+	fileSystem := ProvideFileSystemBlobRepository()
+	repositoryFileSystem := ProvideFileSystemDigestRepository()
+	controller := blob.NewController(logger, fileSystem, repositoryFileSystem)
 	baseController := base.NewController(logger)
-	httpServer := ServerProvider(config, logger, pingController, controller, baseController)
+	fileSystem2 := ProvideFileSystemManifestRepository()
+	manifetsController := manifets.NewController(logger, fileSystem2, repositoryFileSystem)
+	httpServer := ServerProvider(config, logger, pingController, controller, baseController, manifetsController)
 	backend, err := BackendServiceProvider(httpServer)
 	if err != nil {
 		cleanup()

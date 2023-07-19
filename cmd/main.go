@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"poseidon/cmd/commands"
-	"poseidon/cmd/registry_api"
+	"poseidon/cmd/commands/registry_api"
 	"poseidon/internal/consts"
 	"syscall"
 

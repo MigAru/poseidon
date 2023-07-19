@@ -5,7 +5,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
-
 	http2 "poseidon/pkg/http"
 
 	"github.com/gin-gonic/gin"

@@ -2,13 +2,12 @@ package gin
 
 import (
 	"context"
-	"fmt"
-	"io"
 	"net/http"
 	"poseidon/internal/config"
+	"poseidon/internal/interfaces/blob"
+	"poseidon/internal/interfaces/manifest"
 	"poseidon/internal/ping"
 	"poseidon/internal/registry/base"
-	"poseidon/internal/registry/blob"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +23,14 @@ type Server struct {
 	server *http.Server
 }
 
-func NewServer(cfg *config.Config, log *logrus.Logger, pingController *ping.PingController, blobController *blob.Controller, baseController *base.Controller) *Server {
+func NewServer(
+	cfg *config.Config,
+	log *logrus.Logger,
+	pingController *ping.PingController,
+	blobController blob.Controller,
+	baseController *base.Controller,
+	manifestController manifest.Controller,
+) *Server {
 	server := &Server{
 		log:                   log,
 		mainController:        gin.Default(),
@@ -32,30 +38,35 @@ func NewServer(cfg *config.Config, log *logrus.Logger, pingController *ping.Ping
 		port:                  cfg.Server.Port,
 	}
 
-	server.registerControllers(pingController, blobController, baseController)
+	server.registerControllers(pingController, blobController, baseController, manifestController)
 
 	return server
 }
-func (s *Server) registerControllers(ping *ping.PingController, blobController *blob.Controller, baseController *base.Controller) {
+func (s *Server) registerControllers(
+	ping *ping.PingController,
+	blobController blob.Controller,
+	baseController *base.Controller,
+	manifestController manifest.Controller,
+) {
 	s.registerPingController(ping)
 	g := s.mainController.Group("/v2/")
 	g.GET("", func(ctx *gin.Context) {
-		err := baseController.V2(WrapContext(ctx))
-		if err != nil {
-			s.log.Info(err.Error())
+		if err := baseController.V2(WrapContext(ctx)); err != nil {
+			s.log.Error(err.Error())
 		}
 	})
 	g.HEAD(":name/blobs/:digest", func(ctx *gin.Context) {
-		blobController.Get(WrapContext(ctx))
+		if err := blobController.Get(WrapContext(ctx)); err != nil {
+			s.log.Error(err.Error())
+		}
 	})
 	g.GET(":name/blobs/:digest", func(ctx *gin.Context) {
-		blobController.Get(WrapContext(ctx))
+		if err := blobController.Get(WrapContext(ctx)); err != nil {
+			s.log.Error(err.Error())
+		}
 	})
-	g.PUT(":name/manifests/:tag", func(ctx *gin.Context) {
-		b, _ := io.ReadAll(ctx.Request.Body)
-		fmt.Println(string(b))
-	})
-	s.registerBlobController(g, ":name/blobs/uploads/", blobController)
+	s.registerManifestController(g, ":name/manifests/:tag", manifestController)
+	s.registerUploadController(g, ":name/blobs/uploads/", blobController)
 }
 
 func (s *Server) registerPingController(controller *ping.PingController) {

@@ -15,12 +15,13 @@ func NewFileSystem(basePath string) *FileSystem {
 	basePath = path.Join(basePath, "blobs")
 	return &FileSystem{basePath: basePath}
 }
-func (r FileSystem) normalizePath(name string) string {
-	return path.Join(r.basePath, name)
-}
 
 func (r FileSystem) Get(name string) ([]byte, error) {
 	return os.ReadFile(r.normalizePath(name))
+}
+
+func (r FileSystem) normalizePath(name string) string {
+	return path.Join(r.basePath, name)
 }
 
 func (r FileSystem) Create(name string, data []byte) error {
