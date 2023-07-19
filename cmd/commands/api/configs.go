@@ -13,6 +13,7 @@ var configsSet = wire.NewSet(
 )
 
 func ProvideConfigFromCliContext(c *cli.Context) *config.Config {
+	//TODO: переехать на env парсинг структуры
 	return &config.Config{
 		DebugMode: c.Bool(consts.DebugMode),
 		Server: config.Server{

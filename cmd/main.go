@@ -14,6 +14,7 @@ import (
 )
 
 func main() {
+	//TODO: переехать на cobra тк конфиг может растянуться
 	app := &cli.App{
 		Name:  "test task service",
 		Usage: "Run test task service",
