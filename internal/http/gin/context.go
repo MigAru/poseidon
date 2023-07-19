@@ -5,7 +5,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	http2 "poseidon/pkg/http"
+	httpInterface "poseidon/pkg/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +14,7 @@ type Context struct {
 	gctx *gin.Context
 }
 
-func WrapContext(ctx *gin.Context) http2.Context {
+func WrapContext(ctx *gin.Context) httpInterface.Context {
 	return &Context{gctx: ctx}
 }
 
@@ -64,7 +64,7 @@ func (c *Context) Redirect(location string, status int) error {
 	return nil
 }
 
-func (c *Context) Header(key string, def string) string {
+func (c *Context) Header(key string) string {
 	return c.gctx.GetHeader(key)
 }
 

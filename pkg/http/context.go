@@ -19,7 +19,7 @@ type Context interface {
 	OriginalURL() string
 	Request() *http.Request
 	Redirect(location string, status int) error
-	Header(key string, def string) string
+	Header(key string) string
 	SetHeader(key string, val string)
 	OctetStream(code int, data []byte)
 }
