@@ -20,6 +20,7 @@ func (c Controller) V2(ctx http.Context) error {
 }
 
 func (c Controller) Catalog(ctx http.Context) error {
+	//TODO: после реализации всех манифестов и менеджеров - сделать листинг каталога
 	ctx.NoContent(http2.StatusNotFound)
 	return nil
 }

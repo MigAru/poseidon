@@ -7,6 +7,7 @@ import (
 
 func (s *Server) registerUploadController(group *gin.RouterGroup, pattern string, controller blob.Controller) {
 	uploadPattern := pattern + ":uuid"
+
 	// init upload
 	group.POST(pattern, func(ctx *gin.Context) {
 		if err := controller.CreateUpload(WrapContext(ctx)); err != nil {

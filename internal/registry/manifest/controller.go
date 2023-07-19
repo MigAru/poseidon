@@ -20,6 +20,9 @@ type Controller struct {
 	digest     digest.Repository
 }
 
+//TODO: сделать manifest manager
+//TODO: сделать обработку ошибок
+
 func NewController(log *logrus.Logger, repository manifest.Repository, digest digest.Repository) *Controller {
 	return &Controller{
 		log:        log,
@@ -29,24 +32,27 @@ func NewController(log *logrus.Logger, repository manifest.Repository, digest di
 }
 
 func (c Controller) Get(ctx http.Context) (err error) {
-	name := ctx.Param("name")
+	//TODO: сделать валидацию на project и reference
 	var (
-		filename  = ctx.Param("tag")
+		project   = ctx.Param("project")
+		filename  = ctx.Param("reference")
 		fileBytes []byte
 	)
-	params := manifest.NewGetParams(name, filename)
-	if !isFilename(filename) {
+	params := manifest.NewGetParams(project, filename)
+	if !c.isDigest(filename) {
 		filename, err = c.repository.Get(params)
 		if err != nil {
 			return
 		}
 	}
-	fileBytes, err = c.digest.Get(name, filename)
+	fileBytes, err = c.digest.Get(project, filename)
 	if err != nil {
 		return
 	}
+	//TODO: сделать универсальный unmarshaler для manifest v2 v1/oci/manifest list v2
 	var manifest v2_2.Manifest
 	json.Unmarshal(fileBytes, &manifest)
+	//TODO: сделать header builder
 	ctx.SetHeader("Docker-Content-Digest", filename)
 	ctx.SetHeader("Content-Type", manifest.MediaType)
 	ctx.SetHeader("Content-Length", strconv.Itoa(manifest.GetLength()))
@@ -54,35 +60,41 @@ func (c Controller) Get(ctx http.Context) (err error) {
 	return nil
 }
 
-func isFilename(name string) bool {
-	s := strings.Split(name, ":")
-	if len(s) > 1 {
+func (c *Controller) isDigest(name string) bool {
+	hashArray := strings.Split(name, ":")
+	if len(hashArray) > 1 {
 		return true
 	}
-
 	return false
 }
 
 func (c Controller) Create(ctx http.Context) error {
-
+	//TODO: сделать валидацию на пустые проекты и референсы
+	var (
+		project   = ctx.Param("project")
+		reference = ctx.Param("reference")
+	)
 	b, err := io.ReadAll(ctx.Body())
 	if err != nil {
 		return err
 	}
+
 	hasher := sha256.New()
 	hasher.Write(b)
 	hash := fmt.Sprintf("sha256:%x", hasher.Sum(nil))
 
-	params := manifest.NewCreateParams(ctx.Param("name"), ctx.Param("tag"))
+	params := manifest.NewCreateParams(project, reference)
 	if err := c.repository.Create(params.WithFilename(hash).WithData(b)); err != nil {
 		ctx.NoContent(400)
 		return err
 	}
 
-	if err := c.digest.Create(ctx.Param("name"), hash, b); err != nil {
+	if err := c.digest.Create(project, hash, b); err != nil {
 		ctx.NoContent(400)
 		return err
 	}
+	//TODO: сделать перенаправление на blob endpoints
+	//TODO: сделать header builder
 	location := "/v2/" + ctx.Param("name") + "/manifest/" + hash
 	ctx.SetHeader("Location", location)
 	ctx.SetHeader("Docker-Content-Digest", hash)
@@ -91,13 +103,15 @@ func (c Controller) Create(ctx http.Context) error {
 }
 
 func (c Controller) Delete(ctx http.Context) (err error) {
+	//TODO: сделать после менеджера загрузки
 	reference := ctx.Param("tag")
-	if !isFilename(reference) {
-		params := manifest.NewGetParams(ctx.Param("name"), reference)
+	project := ctx.Param("project")
+	if !c.isDigest(reference) {
+		params := manifest.NewGetParams(project, reference)
 		reference, err = c.repository.Get(params)
 	}
 
-	err = c.repository.Delete(manifest.NewBaseParams(ctx.Param("name"), reference))
+	err = c.repository.Delete(manifest.NewBaseParams(project, reference))
 	if err != nil {
 		return
 	}

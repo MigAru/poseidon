@@ -6,7 +6,7 @@ type ErrorResponse struct {
 	Errors []error `json:"errors"`
 }
 
-func CreateErrorResponse(err error) ErrorResponse {
+func NewErrorResponse(err error) ErrorResponse {
 	return ErrorResponse{[]error{err}}
 }
 

@@ -55,18 +55,18 @@ func (s *Server) registerControllers(
 			s.log.Error(err.Error())
 		}
 	})
-	g.HEAD(":name/blobs/:digest", func(ctx *gin.Context) {
+	g.HEAD(":project/blobs/:digest", func(ctx *gin.Context) {
 		if err := blobController.Get(WrapContext(ctx)); err != nil {
 			s.log.Error(err.Error())
 		}
 	})
-	g.GET(":name/blobs/:digest", func(ctx *gin.Context) {
+	g.GET(":project/blobs/:digest", func(ctx *gin.Context) {
 		if err := blobController.Get(WrapContext(ctx)); err != nil {
 			s.log.Error(err.Error())
 		}
 	})
-	s.registerManifestController(g, ":name/manifests/:tag", manifestController)
-	s.registerUploadController(g, ":name/blobs/uploads/", blobController)
+	s.registerManifestController(g, ":project/manifests/:reference", manifestController)
+	s.registerUploadController(g, ":project/blobs/uploads/", blobController)
 }
 
 func (s *Server) registerPingController(controller *ping.PingController) {

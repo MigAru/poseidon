@@ -12,6 +12,7 @@ type FileSystem struct {
 }
 
 func NewFileSystem(basePath string) *FileSystem {
+	//TODO: сделать воркера чтобы удалял после определенного времени блобы(временные файлы)
 	basePath = path.Join(basePath, "blobs")
 	return &FileSystem{basePath: basePath}
 }
@@ -30,12 +31,7 @@ func (r FileSystem) Create(name string, data []byte) error {
 	if err != nil && !os.IsExist(err) {
 		return err
 	}
-	perm := os.O_CREATE
-	if fileExist(name) {
-		perm = perm | os.O_APPEND | os.O_WRONLY
-	} else {
-		perm = perm | os.O_RDWR
-	}
+	perm := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
 	f, err := os.OpenFile(name, perm, 0750)
 	if err != nil {
 		return err
