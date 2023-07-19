@@ -11,11 +11,11 @@ import (
 )
 
 type Context struct {
-	gctx gin.Context
+	gctx *gin.Context
 }
 
 func WrapContext(ctx *gin.Context) http2.Context {
-	return &Context{gctx: *ctx}
+	return &Context{gctx: ctx}
 }
 
 func (c *Context) JSON(code int, i any) {
