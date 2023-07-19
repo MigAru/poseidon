@@ -1,4 +1,4 @@
-module poseidon
+module github.com/MigAru/poseidon
 
 go 1.18
 
