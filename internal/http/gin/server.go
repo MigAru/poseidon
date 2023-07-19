@@ -49,24 +49,16 @@ func (s *Server) registerControllers(
 	manifestController manifest.Controller,
 ) {
 	s.registerPingController(ping)
-	g := s.mainController.Group("/v2/")
-	g.GET("", func(ctx *gin.Context) {
+
+	APIv2Group := s.mainController.Group("/v2/")
+	APIv2Group.GET("", func(ctx *gin.Context) {
 		if err := baseController.V2(WrapContext(ctx)); err != nil {
 			s.log.Error(err.Error())
 		}
 	})
-	g.HEAD(":project/blobs/:digest", func(ctx *gin.Context) {
-		if err := blobController.Get(WrapContext(ctx)); err != nil {
-			s.log.Error(err.Error())
-		}
-	})
-	g.GET(":project/blobs/:digest", func(ctx *gin.Context) {
-		if err := blobController.Get(WrapContext(ctx)); err != nil {
-			s.log.Error(err.Error())
-		}
-	})
-	s.registerManifestController(g, ":project/manifests/:reference", manifestController)
-	s.registerUploadController(g, ":project/blobs/uploads/", blobController)
+	s.registerManifestController(APIv2Group, ":project/manifests/:reference", manifestController)
+	s.registerBlobController(APIv2Group, ":project/blobs/:digest", blobController)
+	s.registerUploadController(APIv2Group, ":project/blobs/uploads/", blobController)
 }
 
 func (s *Server) registerPingController(controller *ping.PingController) {
@@ -91,6 +83,7 @@ func (s *Server) Run() {
 }
 
 func (s *Server) Shutdown() {
+	//TODO: убрать в метод Run(), добавить к методу Run() на вход - context.Context `Run(ctx context.Context)`
 	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeoutSecond*time.Second)
 	defer cancel()
 	err := s.server.Shutdown(ctx)
