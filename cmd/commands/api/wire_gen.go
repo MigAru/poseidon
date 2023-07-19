@@ -28,8 +28,8 @@ func InitializeBackend(ctx *cli.Context) (Backend, func(), error) {
 	controller := blob.NewController(logger, fileSystem, repositoryFileSystem)
 	baseController := base.NewController(logger)
 	fileSystem2 := ProvideFileSystemManifestRepository()
-	manifetsController := manifets.NewController(logger, fileSystem2, repositoryFileSystem)
-	httpServer := ServerProvider(config, logger, pingController, controller, baseController, manifetsController)
+	manifestController := manifest.NewController(logger, fileSystem2, repositoryFileSystem)
+	httpServer := ServerProvider(config, logger, pingController, controller, baseController, manifestController)
 	backend, err := BackendServiceProvider(httpServer)
 	if err != nil {
 		cleanup()
