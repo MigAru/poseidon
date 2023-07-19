@@ -1,10 +1,10 @@
 package api
 
 import (
+	"github.com/MigAru/poseidon/internal/config"
 	"github.com/google/wire"
 	"github.com/sirupsen/logrus"
 	"os"
-	"poseidon/internal/config"
 )
 
 var loggersSet = wire.NewSet(

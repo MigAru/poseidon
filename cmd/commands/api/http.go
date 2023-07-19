@@ -1,17 +1,17 @@
 package api
 
 import (
+	"github.com/MigAru/poseidon/internal/config"
+	"github.com/MigAru/poseidon/internal/http/gin"
+	blobInterface "github.com/MigAru/poseidon/internal/interfaces/blob"
+	manifestInterface "github.com/MigAru/poseidon/internal/interfaces/manifest"
+	"github.com/MigAru/poseidon/internal/ping"
+	"github.com/MigAru/poseidon/internal/registry/base"
+	"github.com/MigAru/poseidon/internal/registry/blob"
+	"github.com/MigAru/poseidon/internal/registry/manifest"
+	"github.com/MigAru/poseidon/pkg/http"
 	"github.com/google/wire"
 	"github.com/sirupsen/logrus"
-	"poseidon/internal/config"
-	"poseidon/internal/http/gin"
-	blobInterface "poseidon/internal/interfaces/blob"
-	manifestInterface "poseidon/internal/interfaces/manifest"
-	"poseidon/internal/ping"
-	"poseidon/internal/registry/base"
-	"poseidon/internal/registry/blob"
-	manifest "poseidon/internal/registry/manifest"
-	"poseidon/pkg/http"
 )
 
 var httpSet = wire.NewSet(

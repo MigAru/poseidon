@@ -2,12 +2,12 @@ package gin
 
 import (
 	"context"
+	"github.com/MigAru/poseidon/internal/config"
+	"github.com/MigAru/poseidon/internal/interfaces/blob"
+	"github.com/MigAru/poseidon/internal/interfaces/manifest"
+	"github.com/MigAru/poseidon/internal/ping"
+	"github.com/MigAru/poseidon/internal/registry/base"
 	"net/http"
-	"poseidon/internal/config"
-	"poseidon/internal/interfaces/blob"
-	"poseidon/internal/interfaces/manifest"
-	"poseidon/internal/ping"
-	"poseidon/internal/registry/base"
 	"time"
 
 	"github.com/gin-gonic/gin"

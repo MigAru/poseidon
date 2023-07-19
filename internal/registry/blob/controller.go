@@ -2,14 +2,14 @@ package blob
 
 import (
 	"bytes"
+	blobInterface "github.com/MigAru/poseidon/internal/interfaces/blob"
+	digestInterface "github.com/MigAru/poseidon/internal/interfaces/digest/digest"
+	"github.com/MigAru/poseidon/pkg/http"
+	"github.com/MigAru/poseidon/pkg/registry/errors"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"io"
 	httpInterface "net/http"
-	blobInterface "poseidon/internal/interfaces/blob"
-	digestInterface "poseidon/internal/interfaces/digest/digest"
-	"poseidon/pkg/http"
-	"poseidon/pkg/registry/errors"
 	"strconv"
 )
 

@@ -1,8 +1,8 @@
 package api
 
 import (
-	"poseidon/internal/config"
-	"poseidon/internal/consts"
+	"github.com/MigAru/poseidon/internal/config"
+	"github.com/MigAru/poseidon/internal/consts"
 
 	"github.com/google/wire"
 	"github.com/urfave/cli/v2"

@@ -1,9 +1,9 @@
 package base
 
 import (
+	"github.com/MigAru/poseidon/pkg/http"
 	"github.com/sirupsen/logrus"
 	http2 "net/http"
-	"poseidon/pkg/http"
 )
 
 type Controller struct {

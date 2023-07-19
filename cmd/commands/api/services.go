@@ -1,8 +1,8 @@
 package api
 
 import (
+	"github.com/MigAru/poseidon/pkg/http"
 	"github.com/google/wire"
-	"poseidon/pkg/http"
 )
 
 var servicesSet = wire.NewSet(BackendServiceProvider)

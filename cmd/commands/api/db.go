@@ -1,13 +1,13 @@
 package api
 
 import (
+	"github.com/MigAru/poseidon/internal/interfaces/blob"
+	"github.com/MigAru/poseidon/internal/interfaces/digest/digest"
+	"github.com/MigAru/poseidon/internal/interfaces/manifest"
+	repository2 "github.com/MigAru/poseidon/internal/registry/blob/repository"
+	"github.com/MigAru/poseidon/internal/registry/digest/repository"
+	repository3 "github.com/MigAru/poseidon/internal/registry/manifest/repository"
 	"github.com/google/wire"
-	"poseidon/internal/interfaces/blob"
-	"poseidon/internal/interfaces/digest/digest"
-	"poseidon/internal/interfaces/manifest"
-	repository2 "poseidon/internal/registry/blob/repository"
-	"poseidon/internal/registry/digest/repository"
-	repository3 "poseidon/internal/registry/manifest/repository"
 )
 
 var dbSet = wire.NewSet(

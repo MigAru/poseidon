@@ -1,7 +1,7 @@
 package blob
 
 import (
-	"poseidon/pkg/http"
+	"github.com/MigAru/poseidon/pkg/http"
 )
 
 type Controller interface {

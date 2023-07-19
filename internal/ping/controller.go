@@ -1,7 +1,7 @@
 package ping
 
 import (
-	"poseidon/pkg/http"
+	"github.com/MigAru/poseidon/pkg/http"
 )
 
 type PingController struct {

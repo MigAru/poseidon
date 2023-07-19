@@ -1,8 +1,8 @@
 package gin
 
 import (
+	"github.com/MigAru/poseidon/internal/interfaces/blob"
 	"github.com/gin-gonic/gin"
-	"poseidon/internal/interfaces/blob"
 )
 
 func (s *Server) registerUploadController(group *gin.RouterGroup, pattern string, controller blob.Controller) {

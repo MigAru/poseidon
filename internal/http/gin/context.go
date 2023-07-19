@@ -1,11 +1,11 @@
 package gin
 
 import (
+	httpInterface "github.com/MigAru/poseidon/pkg/http"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	httpInterface "poseidon/pkg/http"
 
 	"github.com/gin-gonic/gin"
 )

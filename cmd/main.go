@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/MigAru/poseidon/cmd/commands"
+	"github.com/MigAru/poseidon/cmd/commands/api"
+	"github.com/MigAru/poseidon/internal/consts"
 	"os"
 	"os/signal"
-	"poseidon/cmd/commands"
-	"poseidon/cmd/commands/api"
-	"poseidon/internal/consts"
 	"syscall"
 
 	"github.com/urfave/cli/v2"

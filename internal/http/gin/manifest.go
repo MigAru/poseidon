@@ -1,8 +1,8 @@
 package gin
 
 import (
+	"github.com/MigAru/poseidon/internal/interfaces/manifest"
 	"github.com/gin-gonic/gin"
-	"poseidon/internal/interfaces/manifest"
 )
 
 func (s *Server) registerManifestController(group *gin.RouterGroup, pattern string, controller manifest.Controller) {

@@ -7,11 +7,11 @@
 package api
 
 import (
+	"github.com/MigAru/poseidon/internal/ping"
+	"github.com/MigAru/poseidon/internal/registry/base"
+	"github.com/MigAru/poseidon/internal/registry/blob"
+	"github.com/MigAru/poseidon/internal/registry/manifest"
 	"github.com/urfave/cli/v2"
-	"poseidon/internal/ping"
-	"poseidon/internal/registry/base"
-	"poseidon/internal/registry/blob"
-	"poseidon/internal/registry/manifest"
 )
 
 // Injectors from wire.go:
