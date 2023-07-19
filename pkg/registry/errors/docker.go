@@ -17,5 +17,5 @@ type DockerError struct {
 }
 
 func (e DockerError) Error() string {
-	return fmt.Sprintf("")
+	return fmt.Sprintf("Code: %s | MSG: %s | Detail: %s", e.Code, e.Message, e.Detail)
 }

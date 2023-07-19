@@ -34,9 +34,8 @@ func (c *Context) Bind(i any) error {
 	return c.gctx.Bind(&i)
 }
 
-func (c *Context) NoContent(code int) error {
+func (c *Context) NoContent(code int) {
 	c.gctx.AbortWithStatus(code)
-	return nil
 }
 
 func (c *Context) Param(name string) string {

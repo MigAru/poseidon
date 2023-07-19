@@ -13,7 +13,7 @@ var loggersSet = wire.NewSet(
 
 func ProvideNewLogger(cfg *config.Config) (*logrus.Logger, func(), error) {
 	log := logrus.New()
-	if cfg.DebugMode == false {
+	if !cfg.DebugMode {
 		file, err := os.OpenFile("bot.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
 		if err != nil {
 			return nil, func() {}, err

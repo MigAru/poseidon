@@ -1,4 +1,4 @@
-package manifets
+package manifest
 
 import (
 	"crypto/sha256"
@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"
-	"poseidon/internal/interfaces/digest/digest"
-	"poseidon/internal/interfaces/manifest"
+	digestInterface "poseidon/internal/interfaces/digest/digest"
+	manifestInterface "poseidon/internal/interfaces/manifest"
 	"poseidon/pkg/http"
 	v2_2 "poseidon/pkg/registry/manifest/schema/v2.2"
 	"strconv"
@@ -16,14 +16,14 @@ import (
 
 type Controller struct {
 	log        *logrus.Logger
-	repository manifest.Repository
-	digest     digest.Repository
+	repository manifestInterface.Repository
+	digest     digestInterface.Repository
 }
 
 //TODO: сделать manifest manager
 //TODO: сделать обработку ошибок
 
-func NewController(log *logrus.Logger, repository manifest.Repository, digest digest.Repository) *Controller {
+func NewController(log *logrus.Logger, repository manifestInterface.Repository, digest digestInterface.Repository) *Controller {
 	return &Controller{
 		log:        log,
 		repository: repository,
@@ -38,7 +38,7 @@ func (c Controller) Get(ctx http.Context) (err error) {
 		filename  = ctx.Param("reference")
 		fileBytes []byte
 	)
-	params := manifest.NewGetParams(project, filename)
+	params := manifestInterface.NewGetParams(project, filename)
 	if !c.isDigest(filename) {
 		filename, err = c.repository.Get(params)
 		if err != nil {
@@ -62,10 +62,7 @@ func (c Controller) Get(ctx http.Context) (err error) {
 
 func (c *Controller) isDigest(name string) bool {
 	hashArray := strings.Split(name, ":")
-	if len(hashArray) > 1 {
-		return true
-	}
-	return false
+	return len(hashArray) > 1
 }
 
 func (c Controller) Create(ctx http.Context) error {
@@ -83,7 +80,7 @@ func (c Controller) Create(ctx http.Context) error {
 	hasher.Write(b)
 	hash := fmt.Sprintf("sha256:%x", hasher.Sum(nil))
 
-	params := manifest.NewCreateParams(project, reference)
+	params := manifestInterface.NewCreateParams(project, reference)
 	if err := c.repository.Create(params.WithFilename(hash).WithData(b)); err != nil {
 		ctx.NoContent(400)
 		return err
@@ -107,11 +104,14 @@ func (c Controller) Delete(ctx http.Context) (err error) {
 	reference := ctx.Param("tag")
 	project := ctx.Param("project")
 	if !c.isDigest(reference) {
-		params := manifest.NewGetParams(project, reference)
+		params := manifestInterface.NewGetParams(project, reference)
 		reference, err = c.repository.Get(params)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = c.repository.Delete(manifest.NewBaseParams(project, reference))
+	err = c.repository.Delete(manifestInterface.NewBaseParams(project, reference))
 	if err != nil {
 		return
 	}

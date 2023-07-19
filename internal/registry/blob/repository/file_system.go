@@ -46,14 +46,6 @@ func (r FileSystem) Create(name string, data []byte) error {
 	return nil
 }
 
-func fileExist(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
-
 func (r FileSystem) Exist(name string) bool {
 	if _, err := os.Stat(r.normalizePath(name)); err != nil {
 		return false
