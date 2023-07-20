@@ -1,4 +1,4 @@
-package api
+package providers
 
 import (
 	"github.com/MigAru/poseidon/internal/interfaces/blob"

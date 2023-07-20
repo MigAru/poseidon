@@ -1,6 +1,7 @@
 package http
 
-type HttpServer interface {
-	Run()
-	Shutdown()
+import "context"
+
+type Server interface {
+	Run(ctx context.Context)
 }

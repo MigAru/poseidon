@@ -1,4 +1,4 @@
-package api
+package providers
 
 import (
 	"github.com/MigAru/poseidon/internal/config"
@@ -31,6 +31,6 @@ func ServerProvider(
 	blobController blobInterface.Controller,
 	baseController *base.Controller,
 	manifestController manifestInterface.Controller,
-) http.HttpServer {
+) http.Server {
 	return gin.NewServer(cfg, log, pingController, blobController, baseController, manifestController)
 }

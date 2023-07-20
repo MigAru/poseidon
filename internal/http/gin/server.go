@@ -34,7 +34,7 @@ func NewServer(
 	server := &Server{
 		log:                   log,
 		mainController:        gin.Default(),
-		shutdownTimeoutSecond: time.Duration(cfg.Server.TimeoutGracefullShutdown),
+		shutdownTimeoutSecond: time.Duration(cfg.Server.TimeoutGracefullShutdown) * time.Second,
 		port:                  cfg.Server.Port,
 	}
 
@@ -67,7 +67,7 @@ func (s *Server) registerPingController(controller *ping.PingController) {
 	})
 }
 
-func (s *Server) Run() {
+func (s *Server) Run(ctx context.Context) {
 	s.server = &http.Server{
 		Addr:    s.port,
 		Handler: s.mainController,
@@ -79,14 +79,15 @@ func (s *Server) Run() {
 			s.log.Error(err)
 			return
 		}
+		s.shutdown(ctx)
 	}()
 }
 
-func (s *Server) Shutdown() {
-	//TODO: убрать в метод Run(), добавить к методу Run() на вход - context.Context `Run(ctx context.Context)`
-	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeoutSecond*time.Second)
+func (s *Server) shutdown(ctx context.Context) {
+	<-ctx.Done()
+	shutdown, cancel := context.WithTimeout(ctx, s.shutdownTimeoutSecond*time.Second)
 	defer cancel()
-	err := s.server.Shutdown(ctx)
+	err := s.server.Shutdown(shutdown)
 	if err != nil {
 		s.log.Error(err)
 		return

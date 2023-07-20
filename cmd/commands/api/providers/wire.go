@@ -1,16 +1,16 @@
 //go:build wireinject
 // +build wireinject
 
-package api
+package providers
 
 import (
+	"context"
 	"github.com/google/wire"
-	"github.com/urfave/cli/v2"
 )
 
 type Backend struct{}
 
-func InitializeBackend(ctx *cli.Context) (Backend, func(), error) {
+func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 	panic(wire.Build(
 		configsSet,
 		loggersSet,

@@ -4,20 +4,23 @@
 //go:build !wireinject
 // +build !wireinject
 
-package api
+package providers
 
 import (
+	"context"
 	"github.com/MigAru/poseidon/internal/ping"
 	"github.com/MigAru/poseidon/internal/registry/base"
 	"github.com/MigAru/poseidon/internal/registry/blob"
 	"github.com/MigAru/poseidon/internal/registry/manifest"
-	"github.com/urfave/cli/v2"
 )
 
 // Injectors from wire.go:
 
-func InitializeBackend(ctx *cli.Context) (Backend, func(), error) {
-	config := ProvideConfigFromCliContext(ctx)
+func InitializeBackend(ctx context.Context) (Backend, func(), error) {
+	config, err := ProvideConfigFromEnv()
+	if err != nil {
+		return Backend{}, nil, err
+	}
 	logger, cleanup, err := ProvideNewLogger(config)
 	if err != nil {
 		return Backend{}, nil, err
@@ -29,8 +32,8 @@ func InitializeBackend(ctx *cli.Context) (Backend, func(), error) {
 	baseController := base.NewController(logger)
 	fileSystem2 := ProvideFileSystemManifestRepository()
 	manifestController := manifest.NewController(logger, fileSystem2, repositoryFileSystem)
-	httpServer := ServerProvider(config, logger, pingController, controller, baseController, manifestController)
-	backend, err := BackendServiceProvider(httpServer)
+	server := ServerProvider(config, logger, pingController, controller, baseController, manifestController)
+	backend, err := BackendServiceProvider(ctx, server)
 	if err != nil {
 		cleanup()
 		return Backend{}, nil, err
