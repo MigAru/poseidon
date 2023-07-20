@@ -1,5 +1,5 @@
 gen-api:
-	cd ./cmd/commands/api && ~/go/bin/wire; cd ../..
+	cd ./cmd/commands/api/providers && ~/go/bin/wire; cd ../..
 
 run-api:
 	docker run -d --name poseidon-api poseidon-api
