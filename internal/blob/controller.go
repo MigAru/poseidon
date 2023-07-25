@@ -2,7 +2,7 @@ package blob
 
 import (
 	"bytes"
-	blobInterface "github.com/MigAru/poseidon/internal/interfaces/blob"
+	"github.com/MigAru/poseidon/internal/file_system"
 	digestInterface "github.com/MigAru/poseidon/internal/interfaces/digest/digest"
 	"github.com/MigAru/poseidon/pkg/http"
 	"github.com/MigAru/poseidon/pkg/registry/errors"
@@ -15,20 +15,20 @@ import (
 
 type Controller struct {
 	log    *logrus.Logger
-	blob   blobInterface.Repository
+	fs     *file_system.FS
 	digest digestInterface.Repository
 }
 
 //TODO: сделать uploads manager
 //TODO: сделать обработку ошибок
 
-func NewController(log *logrus.Logger, blob blobInterface.Repository, digest digestInterface.Repository) *Controller {
-	return &Controller{log: log, blob: blob, digest: digest}
+func NewController(log *logrus.Logger, fs *file_system.FS, digest digestInterface.Repository) *Controller {
+	return &Controller{log: log, digest: digest, fs: fs}
 }
 
 //TODO: подумать над тем чтобы вынести в отдельный контроллер загрузок
 
-func (c Controller) GetUpload(ctx http.Context) error {
+func (c Controller) GetUpload(_ http.Context) error {
 	//нужно при разбитии запроса
 	return nil
 }
@@ -65,7 +65,7 @@ func (c Controller) Upload(ctx http.Context) error {
 	if ctx.QueryParam("digest") != "" {
 		//для того чтобы создать постоянный слой в памяти
 		if ctx.Header("Content-Length") == "0" {
-			data, _ := c.blob.Get(UUID)
+			data, _ := c.fs.GetBlob(UUID)
 			if err := c.digest.Create(project, ctx.QueryParam("digest"), data); err != nil {
 				return err
 			}
@@ -85,7 +85,7 @@ func (c Controller) Upload(ctx http.Context) error {
 		ctx.JSON(httpInterface.StatusBadRequest, errors.NewErrorResponse(errors.BlobUploadUnknown))
 		return err
 	}
-	if err := c.blob.Create(UUID, buffer.Bytes()); err != nil {
+	if err := c.fs.CreateBlob(UUID, buffer.Bytes()); err != nil {
 		return err
 	}
 
@@ -98,7 +98,7 @@ func (c Controller) Upload(ctx http.Context) error {
 	return nil
 }
 
-func (c Controller) DeleteUpload(ctx http.Context) error {
+func (c Controller) DeleteUpload(_ http.Context) error {
 	//TODO: реализовать когда будет реализован менеджер загрузок
 	return nil
 }

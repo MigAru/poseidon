@@ -1,27 +1,25 @@
 package providers
 
 import (
-	"github.com/MigAru/poseidon/internal/interfaces/blob"
+	"github.com/MigAru/poseidon/internal/config"
+	"github.com/MigAru/poseidon/internal/file_system"
 	"github.com/MigAru/poseidon/internal/interfaces/digest/digest"
 	"github.com/MigAru/poseidon/internal/interfaces/manifest"
-	repository2 "github.com/MigAru/poseidon/internal/registry/blob/repository"
 	"github.com/MigAru/poseidon/internal/registry/digest/repository"
 	repository3 "github.com/MigAru/poseidon/internal/registry/manifest/repository"
 	"github.com/google/wire"
 )
 
 var dbSet = wire.NewSet(
-	ProvideFileSystemBlobRepository,
-	wire.Bind(new(blob.Repository), new(*repository2.FileSystem)),
+	ProvideFileSystem,
 	ProvideFileSystemDigestRepository,
 	wire.Bind(new(digest.Repository), new(*repository.FileSystem)),
 	ProvideFileSystemManifestRepository,
 	wire.Bind(new(manifest.Repository), new(*repository3.FileSystem)),
 )
 
-func ProvideFileSystemBlobRepository() *repository2.FileSystem {
-	//TODO: сделать переменную в конфиге где прописывается куда складывать файлы
-	return repository2.NewFileSystem("tmp")
+func ProvideFileSystem(_ *config.Config) *file_system.FS {
+	return file_system.New("tmp")
 }
 
 func ProvideFileSystemDigestRepository() *repository.FileSystem {
