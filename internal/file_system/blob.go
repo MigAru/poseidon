@@ -7,15 +7,15 @@ import (
 	"path"
 )
 
-func (f FS) GetBlob(name string) ([]byte, error) {
+func (f *FS) GetBlob(name string) ([]byte, error) {
 	return os.ReadFile(f.normalizePath(name))
 }
 
-func (f FS) normalizePath(name string) string {
+func (f *FS) normalizePath(name string) string {
 	return path.Join(f.basePath, name)
 }
 
-func (f FS) CreateBlob(name string, data []byte) error {
+func (f *FS) CreateBlob(name string, data []byte) error {
 	name = f.normalizePath(name)
 	err := os.MkdirAll(f.basePath, 0750)
 	if err != nil && !os.IsExist(err) {
@@ -36,14 +36,14 @@ func (f FS) CreateBlob(name string, data []byte) error {
 	return nil
 }
 
-func (f FS) CheckExistBlob(name string) bool {
+func (f *FS) CheckExistBlob(name string) bool {
 	if _, err := os.Stat(f.normalizePath(name)); err != nil {
 		return false
 	}
 	return true
 }
 
-func (f FS) DeleteBlob(_ string) error {
+func (f *FS) DeleteBlob(_ string) error {
 	//TODO: реализовать после менеджера загрузок
 	panic("implement me")
 }
