@@ -2,8 +2,8 @@ package gin
 
 import (
 	"context"
+	"github.com/MigAru/poseidon/internal/blob"
 	"github.com/MigAru/poseidon/internal/config"
-	"github.com/MigAru/poseidon/internal/interfaces/blob"
 	"github.com/MigAru/poseidon/internal/interfaces/manifest"
 	"github.com/MigAru/poseidon/internal/ping"
 	"github.com/MigAru/poseidon/internal/registry/base"
@@ -27,7 +27,7 @@ func NewServer(
 	cfg *config.Config,
 	log *logrus.Logger,
 	pingController *ping.PingController,
-	blobController blob.Controller,
+	blobController *blob.Controller,
 	baseController *base.Controller,
 	manifestController manifest.Controller,
 ) *Server {
@@ -44,7 +44,7 @@ func NewServer(
 }
 func (s *Server) registerControllers(
 	ping *ping.PingController,
-	blobController blob.Controller,
+	blobController *blob.Controller,
 	baseController *base.Controller,
 	manifestController manifest.Controller,
 ) {
