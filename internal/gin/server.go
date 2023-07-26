@@ -2,11 +2,11 @@ package gin
 
 import (
 	"context"
+	"github.com/MigAru/poseidon/internal/base"
 	"github.com/MigAru/poseidon/internal/blob"
 	"github.com/MigAru/poseidon/internal/config"
-	"github.com/MigAru/poseidon/internal/interfaces/manifest"
+	"github.com/MigAru/poseidon/internal/manifest"
 	"github.com/MigAru/poseidon/internal/ping"
-	"github.com/MigAru/poseidon/internal/registry/base"
 	"net/http"
 	"time"
 
@@ -29,7 +29,7 @@ func NewServer(
 	pingController *ping.PingController,
 	blobController *blob.Controller,
 	baseController *base.Controller,
-	manifestController manifest.Controller,
+	manifestController *manifest.Controller,
 ) *Server {
 	server := &Server{
 		log:                   log,
@@ -46,7 +46,7 @@ func (s *Server) registerControllers(
 	ping *ping.PingController,
 	blobController *blob.Controller,
 	baseController *base.Controller,
-	manifestController manifest.Controller,
+	manifestController *manifest.Controller,
 ) {
 	s.registerPingController(ping)
 
@@ -67,7 +67,7 @@ func (s *Server) registerPingController(controller *ping.PingController) {
 	})
 }
 
-func (s *Server) Run(ctx context.Context) {
+func (s *Server) Run() {
 	s.server = &http.Server{
 		Addr:    s.port,
 		Handler: s.mainController,
@@ -79,13 +79,11 @@ func (s *Server) Run(ctx context.Context) {
 			s.log.Error(err)
 			return
 		}
-		s.shutdown(ctx)
 	}()
 }
 
-func (s *Server) shutdown(ctx context.Context) {
-	<-ctx.Done()
-	shutdown, cancel := context.WithTimeout(ctx, s.shutdownTimeoutSecond*time.Second)
+func (s *Server) Shutdown() {
+	shutdown, cancel := context.WithTimeout(context.Background(), s.shutdownTimeoutSecond*time.Second)
 	defer cancel()
 	err := s.server.Shutdown(shutdown)
 	if err != nil {

@@ -8,37 +8,39 @@ package providers
 
 import (
 	"context"
+	"github.com/MigAru/poseidon/internal/base"
 	"github.com/MigAru/poseidon/internal/blob"
+	"github.com/MigAru/poseidon/internal/config"
+	"github.com/MigAru/poseidon/internal/file_system"
+	"github.com/MigAru/poseidon/internal/logger"
+	"github.com/MigAru/poseidon/internal/manifest"
 	"github.com/MigAru/poseidon/internal/ping"
-	"github.com/MigAru/poseidon/internal/registry/base"
-	"github.com/MigAru/poseidon/internal/registry/manifest"
 )
 
 // Injectors from wire.go:
 
 func InitializeBackend(ctx context.Context) (Backend, func(), error) {
-	config, err := ProvideConfigFromEnv()
+	configConfig, err := config.NewFromEnv()
 	if err != nil {
 		return Backend{}, nil, err
 	}
-	logger, cleanup, err := ProvideNewLogger(config)
+	logrusLogger, cleanup, err := logger.NewLogrus(configConfig)
 	if err != nil {
 		return Backend{}, nil, err
 	}
 	pingController := ping.NewPingController()
-	fs := ProvideFileSystem(config)
-	fileSystem := ProvideFileSystemDigestRepository()
-	controller := blob.NewController(logger, fs, fileSystem)
-	baseController := base.NewController(logger)
-	repositoryFileSystem := ProvideFileSystemManifestRepository()
-	manifestController := manifest.NewController(logger, repositoryFileSystem, fileSystem)
-	server := ServerProvider(config, logger, pingController, controller, baseController, manifestController)
-	backend, err := BackendServiceProvider(ctx, server)
+	fs := file_system.New(configConfig)
+	controller := blob.NewController(logrusLogger, fs)
+	baseController := base.NewController(logrusLogger)
+	manifestController := manifest.NewController(logrusLogger, fs)
+	server := ServerProvider(configConfig, logrusLogger, pingController, controller, baseController, manifestController)
+	backend, cleanup2, err := ServiceProvider(ctx, server)
 	if err != nil {
 		cleanup()
 		return Backend{}, nil, err
 	}
 	return backend, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }

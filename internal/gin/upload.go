@@ -1,11 +1,11 @@
 package gin
 
 import (
-	"github.com/MigAru/poseidon/internal/interfaces/blob"
+	"github.com/MigAru/poseidon/internal/blob"
 	"github.com/gin-gonic/gin"
 )
 
-func (s *Server) registerUploadController(group *gin.RouterGroup, pattern string, controller blob.Controller) {
+func (s *Server) registerUploadController(group *gin.RouterGroup, pattern string, controller *blob.Controller) {
 	uploadPattern := pattern + ":uuid"
 
 	// init upload

@@ -4,8 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	digestInterface "github.com/MigAru/poseidon/internal/interfaces/digest/digest"
-	manifestInterface "github.com/MigAru/poseidon/internal/interfaces/manifest"
+	"github.com/MigAru/poseidon/internal/file_system"
 	"github.com/MigAru/poseidon/pkg/http"
 	v2_2 "github.com/MigAru/poseidon/pkg/registry/manifest/schema/v2.2"
 	"github.com/sirupsen/logrus"
@@ -15,19 +14,17 @@ import (
 )
 
 type Controller struct {
-	log        *logrus.Logger
-	repository manifestInterface.Repository
-	digest     digestInterface.Repository
+	log *logrus.Logger
+	fs  *file_system.FS
 }
 
 //TODO: сделать manifest manager
 //TODO: сделать обработку ошибок
 
-func NewController(log *logrus.Logger, repository manifestInterface.Repository, digest digestInterface.Repository) *Controller {
+func NewController(log *logrus.Logger, fs *file_system.FS) *Controller {
 	return &Controller{
-		log:        log,
-		repository: repository,
-		digest:     digest,
+		log: log,
+		fs:  fs,
 	}
 }
 
@@ -38,14 +35,14 @@ func (c *Controller) Get(ctx http.Context) (err error) {
 		filename  = ctx.Param("reference")
 		fileBytes []byte
 	)
-	params := manifestInterface.NewGetParams(project, filename)
+	params := file_system.NewGetParamsManifest(project, filename)
 	if !c.isDigest(filename) {
-		filename, err = c.repository.Get(params)
+		filename, err = c.fs.GetManifest(params)
 		if err != nil {
 			return
 		}
 	}
-	fileBytes, err = c.digest.Get(project, filename)
+	fileBytes, err = c.fs.GetDigest(project, filename)
 	if err != nil {
 		return
 	}
@@ -82,13 +79,13 @@ func (c *Controller) Create(ctx http.Context) error {
 	hasher.Write(b)
 	hash := fmt.Sprintf("sha256:%x", hasher.Sum(nil))
 
-	params := manifestInterface.NewCreateParams(project, reference)
-	if err := c.repository.Create(params.WithFilename(hash).WithData(b)); err != nil {
+	params := file_system.NewCreateParamsManifest(project, reference)
+	if err := c.fs.CreateManifest(params.WithFilename(hash).WithData(b)); err != nil {
 		ctx.NoContent(400)
 		return err
 	}
 
-	if err := c.digest.Create(project, hash, b); err != nil {
+	if err := c.fs.CreateDigest(project, hash, b); err != nil {
 		ctx.NoContent(400)
 		return err
 	}
@@ -106,19 +103,19 @@ func (c *Controller) Delete(ctx http.Context) (err error) {
 	reference := ctx.Param("tag")
 	project := ctx.Param("project")
 	if !c.isDigest(reference) {
-		params := manifestInterface.NewGetParams(project, reference)
-		reference, err = c.repository.Get(params)
+		params := file_system.NewGetParamsManifest(project, reference)
+		reference, err = c.fs.GetManifest(params)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = c.repository.Delete(manifestInterface.NewBaseParams(project, reference))
+	err = c.fs.DeleteManifest(file_system.NewBaseParamsManifest(project, reference))
 	if err != nil {
 		return
 	}
 
-	err = c.digest.Delete(ctx.Param("name"), reference)
+	err = c.fs.DeleteDigest(ctx.Param("name"), reference)
 	if err != nil {
 		return
 	}
