@@ -6,5 +6,5 @@ import (
 )
 
 var helpersSet = wire.NewSet(
-	hasher.NewFactory,
+	hasher.NewHasher,
 )

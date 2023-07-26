@@ -12,7 +12,7 @@ import (
 type Hasher struct {
 }
 
-func NewFactory() *Hasher {
+func NewHasher() *Hasher {
 	return &Hasher{}
 }
 
