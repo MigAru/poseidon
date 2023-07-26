@@ -8,9 +8,9 @@ package providers
 
 import (
 	"context"
+	"github.com/MigAru/poseidon/internal/blob"
 	"github.com/MigAru/poseidon/internal/ping"
 	"github.com/MigAru/poseidon/internal/registry/base"
-	"github.com/MigAru/poseidon/internal/registry/blob"
 	"github.com/MigAru/poseidon/internal/registry/manifest"
 )
 
@@ -26,12 +26,12 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 		return Backend{}, nil, err
 	}
 	pingController := ping.NewPingController()
-	fileSystem := ProvideFileSystemBlobRepository()
-	repositoryFileSystem := ProvideFileSystemDigestRepository()
-	controller := blob.NewController(logger, fileSystem, repositoryFileSystem)
+	fs := ProvideFileSystem(config)
+	fileSystem := ProvideFileSystemDigestRepository()
+	controller := blob.NewController(logger, fs, fileSystem)
 	baseController := base.NewController(logger)
-	fileSystem2 := ProvideFileSystemManifestRepository()
-	manifestController := manifest.NewController(logger, fileSystem2, repositoryFileSystem)
+	repositoryFileSystem := ProvideFileSystemManifestRepository()
+	manifestController := manifest.NewController(logger, repositoryFileSystem, fileSystem)
 	server := ServerProvider(config, logger, pingController, controller, baseController, manifestController)
 	backend, err := BackendServiceProvider(ctx, server)
 	if err != nil {

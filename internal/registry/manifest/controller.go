@@ -31,7 +31,7 @@ func NewController(log *logrus.Logger, repository manifestInterface.Repository, 
 	}
 }
 
-func (c Controller) Get(ctx http.Context) (err error) {
+func (c *Controller) Get(ctx http.Context) (err error) {
 	//TODO: сделать валидацию на project и reference
 	var (
 		project   = ctx.Param("project")
@@ -51,7 +51,9 @@ func (c Controller) Get(ctx http.Context) (err error) {
 	}
 	//TODO: сделать универсальный unmarshaler для manifest v2 v1/oci/manifest list v2
 	var manifest v2_2.Manifest
-	json.Unmarshal(fileBytes, &manifest)
+	if err := json.Unmarshal(fileBytes, &manifest); err != nil {
+		return err
+	}
 	//TODO: сделать header builder
 	ctx.SetHeader("Docker-Content-Digest", filename)
 	ctx.SetHeader("Content-Type", manifest.MediaType)
@@ -65,7 +67,7 @@ func (c *Controller) isDigest(name string) bool {
 	return len(hashArray) > 1
 }
 
-func (c Controller) Create(ctx http.Context) error {
+func (c *Controller) Create(ctx http.Context) error {
 	//TODO: сделать валидацию на пустые проекты и референсы
 	var (
 		project   = ctx.Param("project")
@@ -99,7 +101,7 @@ func (c Controller) Create(ctx http.Context) error {
 	return nil
 }
 
-func (c Controller) Delete(ctx http.Context) (err error) {
+func (c *Controller) Delete(ctx http.Context) (err error) {
 	//TODO: сделать после менеджера загрузки
 	reference := ctx.Param("tag")
 	project := ctx.Param("project")
