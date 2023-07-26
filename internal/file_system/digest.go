@@ -1,4 +1,4 @@
-package repository
+package file_system
 
 import (
 	"bytes"
@@ -8,26 +8,17 @@ import (
 	"strings"
 )
 
-type FileSystem struct {
-	basePath string
-}
-
-func NewFileSystem(basePath string) *FileSystem {
-	basePath = path.Join(basePath, "digests")
-	return &FileSystem{basePath: basePath}
-}
-
-func (r FileSystem) Get(project, name string) ([]byte, error) {
+func (f *FS) GetDigest(project, name string) ([]byte, error) {
 	ar := strings.Split(name, ":")
 	algo, hash := ar[0], ar[1]
-	digestPath := path.Join(r.basePath, project, algo, hash[:3], name)
+	digestPath := path.Join(f.basePath, project, algo, hash[:3], name)
 	return os.ReadFile(digestPath)
 }
 
-func (r FileSystem) Create(project, name string, data []byte) error {
+func (f *FS) CreateDigest(project, name string, data []byte) error {
 	ar := strings.Split(name, ":")
 	algo, hash := ar[0], ar[1]
-	digestPath := path.Join(r.basePath, project, algo, hash[:3])
+	digestPath := path.Join(f.basePath, project, algo, hash[:3])
 	err := os.MkdirAll(digestPath, 0750)
 	if err != nil && !os.IsExist(err) {
 		return err
@@ -38,15 +29,17 @@ func (r FileSystem) Create(project, name string, data []byte) error {
 	} else {
 		perm = perm | os.O_RDWR
 	}
-	f, err := os.OpenFile(path.Join(digestPath, name), perm, 0750)
+	file, err := os.OpenFile(path.Join(digestPath, name), perm, 0750)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer file.Close()
 
-	_, err = io.Copy(f, bytes.NewBuffer(data))
+	_, err = io.Copy(file, bytes.NewBuffer(data))
 	if err != nil {
-		os.Remove(name)
+		if err := os.Remove(name); err != nil {
+			return err
+		}
 		return err
 	}
 	return nil
@@ -60,12 +53,12 @@ func fileExist(filename string) bool {
 	return !info.IsDir()
 }
 
-func (r FileSystem) Exist(project, name string) error {
+func (f *FS) ExistDigest(project, name string) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (r FileSystem) Delete(project, name string) error {
+func (f *FS) DeleteDigest(project, name string) error {
 	//TODO implement me
 	panic("implement me")
 }

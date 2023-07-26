@@ -1,17 +1,12 @@
-package providers
+package logger
 
 import (
 	"github.com/MigAru/poseidon/internal/config"
-	"github.com/google/wire"
 	"github.com/sirupsen/logrus"
 	"os"
 )
 
-var loggersSet = wire.NewSet(
-	ProvideNewLogger,
-)
-
-func ProvideNewLogger(cfg *config.Config) (*logrus.Logger, func(), error) {
+func NewLogrus(cfg *config.Config) (*logrus.Logger, func(), error) {
 	log := logrus.New()
 	if !cfg.DebugMode {
 		file, err := os.OpenFile("bot.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)

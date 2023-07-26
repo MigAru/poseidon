@@ -3,7 +3,6 @@ package blob
 import (
 	"bytes"
 	"github.com/MigAru/poseidon/internal/file_system"
-	digestInterface "github.com/MigAru/poseidon/internal/interfaces/digest/digest"
 	"github.com/MigAru/poseidon/pkg/http"
 	"github.com/MigAru/poseidon/pkg/registry/errors"
 	"github.com/google/uuid"
@@ -14,16 +13,15 @@ import (
 )
 
 type Controller struct {
-	log    *logrus.Logger
-	fs     *file_system.FS
-	digest digestInterface.Repository
+	log *logrus.Logger
+	fs  *file_system.FS
 }
 
 //TODO: сделать uploads manager
 //TODO: сделать обработку ошибок
 
-func NewController(log *logrus.Logger, fs *file_system.FS, digest digestInterface.Repository) *Controller {
-	return &Controller{log: log, digest: digest, fs: fs}
+func NewController(log *logrus.Logger, fs *file_system.FS) *Controller {
+	return &Controller{log: log, fs: fs}
 }
 
 //TODO: подумать над тем чтобы вынести в отдельный контроллер загрузок
@@ -66,7 +64,7 @@ func (c Controller) Upload(ctx http.Context) error {
 		//для того чтобы создать постоянный слой в памяти
 		if ctx.Header("Content-Length") == "0" {
 			data, _ := c.fs.GetBlob(UUID)
-			if err := c.digest.Create(project, ctx.QueryParam("digest"), data); err != nil {
+			if err := c.fs.CreateDigest(project, ctx.QueryParam("digest"), data); err != nil {
 				return err
 			}
 
@@ -106,7 +104,7 @@ func (c Controller) DeleteUpload(_ http.Context) error {
 func (c Controller) Get(ctx http.Context) error {
 	//TODO: сделать кэш отдачи слоев в памяти(middleware)
 	digest := ctx.Param("digest")
-	data, err := c.digest.Get(ctx.Param("project"), digest)
+	data, err := c.fs.GetDigest(ctx.Param("project"), digest)
 	if err != nil {
 		//TODO: сделать response builder
 		ctx.JSON(404, errors.NewErrorResponse(errors.BlobUnknown))

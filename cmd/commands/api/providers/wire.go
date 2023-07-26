@@ -5,6 +5,13 @@ package providers
 
 import (
 	"context"
+	"github.com/MigAru/poseidon/internal/base"
+	"github.com/MigAru/poseidon/internal/blob"
+	"github.com/MigAru/poseidon/internal/config"
+	"github.com/MigAru/poseidon/internal/file_system"
+	"github.com/MigAru/poseidon/internal/logger"
+	"github.com/MigAru/poseidon/internal/manifest"
+	"github.com/MigAru/poseidon/internal/ping"
 	"github.com/google/wire"
 )
 
@@ -12,10 +19,14 @@ type Backend struct{}
 
 func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 	panic(wire.Build(
-		configsSet,
-		loggersSet,
-		dbSet,
-		httpSet,
-		servicesSet,
+		config.NewFromEnv,
+		logger.NewLogrus,
+		file_system.New,
+		ping.NewPingController,
+		base.NewController,
+		blob.NewController,
+		manifest.NewController,
+		ServerProvider,
+		ServiceProvider,
 	))
 }
