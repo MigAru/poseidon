@@ -23,6 +23,8 @@ type Server struct {
 	server *http.Server
 }
 
+//TODO: вынести отдельный контроллер на upload
+
 func NewServer(
 	cfg *config.Config,
 	log *logrus.Logger,
