@@ -11,7 +11,7 @@ func (u *Uploads) Update(params *UpdateParams) error {
 	}
 
 	if params.Chunk != nil {
-		upload.Queue = append(upload.Queue, params.Chunk)
+		upload.Bus <- params.Chunk
 	}
 	if params.UploadedBytes > 0 {
 		upload.UploadedBytes += params.UploadedBytes

@@ -11,6 +11,7 @@ type Manager struct {
 	log             *logrus.Entry
 	uploads         *Uploads
 	bus             chan Metadata
+	chunkBus        chan Chunk
 	busWorkersLimit int
 }
 

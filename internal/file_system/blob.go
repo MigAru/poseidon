@@ -15,13 +15,13 @@ func (f *FS) normalizePath(name string) string {
 	return path.Join(f.basePath, name)
 }
 
-func (f *FS) CreateBlob(name string, data []byte) error {
+func (f *FS) UploadBlob(name string, data []byte) error {
 	name = f.normalizePath(name)
 	err := os.MkdirAll(f.basePath, 0750)
 	if err != nil && !os.IsExist(err) {
 		return err
 	}
-	perm := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
+	perm := os.O_CREATE | os.O_APPEND | os.O_WRONLY
 	file, err := os.OpenFile(name, perm, 0750)
 	if err != nil {
 		return err

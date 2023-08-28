@@ -7,10 +7,14 @@ func (u *Uploads) Create(params CreateParams) (string, error) {
 	if err != nil {
 		return id.String(), err
 	}
+
 	u.mu.Lock()
 	defer u.mu.Unlock()
 
-	u.unsafe[id.String()] = NewUpload(id.String(), params.ProjectName, params.TotalSize)
+	uploadParams := NewInitUploadParams(id.String(), params.ProjectName, u.bus)
+	upload := NewUpload(uploadParams.WithFS(u.fs))
+
+	u.unsafe[id.String()] = upload
 
 	return id.String(), nil
 }
@@ -18,4 +22,5 @@ func (u *Uploads) Create(params CreateParams) (string, error) {
 type CreateParams struct {
 	TotalSize   int
 	ProjectName string
+	Bus         chan Chunk
 }

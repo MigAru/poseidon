@@ -83,7 +83,7 @@ func (c Controller) Upload(ctx http.Context) error {
 		ctx.JSON(httpInterface.StatusBadRequest, errors.NewErrorResponse(errors.BlobUploadUnknown))
 		return err
 	}
-	if err := c.fs.CreateBlob(UUID, buffer.Bytes()); err != nil {
+	if err := c.fs.UploadBlob(UUID, buffer.Bytes()); err != nil {
 		return err
 	}
 
