@@ -54,7 +54,7 @@ func (p *CreateParamsManifest) WithData(bytes []byte) *CreateParamsManifest {
 }
 
 func (f *FS) GetManifest(params *GetParamsManifest) (filename string, err error) {
-	manifestsPath := path.Join(f.basePath, params.Project, params.Tag)
+	manifestsPath := path.Join(f.basePath, "manifests", params.Project, params.Tag)
 	if params.Filename == "" {
 		filename, err = f.getFilenameFromDir(manifestsPath)
 		if err != nil {
@@ -86,7 +86,7 @@ func (f *FS) getFilenameFromDir(path string) (filename string, err error) {
 }
 
 func (f *FS) CreateManifest(params *CreateParamsManifest) error {
-	manifestPath := path.Join(f.basePath, params.Project, params.Tag)
+	manifestPath := path.Join(f.basePath, "manifests", params.Project, params.Tag)
 	err := os.MkdirAll(manifestPath, 0750)
 	if err != nil && !os.IsExist(err) {
 		return err
@@ -105,10 +105,12 @@ func (f *FS) CreateManifest(params *CreateParamsManifest) error {
 	if err != nil {
 		return err
 	}
+
 	defer file.Close()
+
 	_, err = io.Copy(file, bytes.NewBuffer([]byte(params.Filename)))
 	if err != nil {
-		if err := os.RemoveAll(path.Join(f.basePath, params.Project)); err != nil {
+		if err := os.RemoveAll(path.Join(f.basePath, "manifests", params.Project)); err != nil {
 			return err
 		}
 		return err
@@ -117,7 +119,7 @@ func (f *FS) CreateManifest(params *CreateParamsManifest) error {
 }
 
 func (f *FS) DeleteManifest(params *BaseParamsManifest) error {
-	var searchPath = path.Join(f.basePath, params.Project)
+	var searchPath = path.Join(f.basePath, "manifests", params.Project)
 	files, err := os.ReadDir(searchPath)
 	if err != nil {
 		return err
