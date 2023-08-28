@@ -2,19 +2,19 @@ package upload
 
 import "errors"
 
-func (u *Uploads) Update(params *UpdateParams) error {
+func (u *Uploads) update(params *UpdateParams) error {
 	u.mu.Lock()
-	defer u.mu.Unlock()
 	upload, ok := u.unsafe[params.ID]
+	u.mu.Unlock()
 	if !ok {
 		return errors.New("upload not found")
 	}
 
 	if params.Chunk != nil {
-		upload.Bus <- params.Chunk
+		return u.fs.UploadBlob(upload.ID, params.Chunk)
 	}
 	if params.UploadedBytes > 0 {
-		upload.UploadedBytes += params.UploadedBytes
+		upload.UploadedBytes = upload.UploadedBytes + params.UploadedBytes
 	}
 	return nil
 }

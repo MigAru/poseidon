@@ -70,7 +70,11 @@ func (c *Context) Header(key string) string {
 func (c *Context) SetHeader(key string, value string) {
 	c.gctx.Header(key, value)
 }
-
+func (c *Context) SetHeaders(headers []httpInterface.Header) {
+	for _, header := range headers {
+		c.gctx.Header(header.Key, header.Value)
+	}
+}
 func (c *Context) OctetStream(code int, data []byte) {
 	c.gctx.Data(code, "application/octet-stream", data)
 }

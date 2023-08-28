@@ -2,19 +2,21 @@ package upload
 
 import (
 	"github.com/MigAru/poseidon/internal/file_system"
+	"github.com/sirupsen/logrus"
 	"sync"
 )
 
 type Uploads struct {
 	mu     sync.RWMutex
 	fs     *file_system.FS
-	bus    chan Chunk
+	log    *logrus.Logger
 	unsafe map[string]*Upload
 }
 
-func NewUploads() *Uploads {
+func NewUploads(fs *file_system.FS, log *logrus.Logger) *Uploads {
 	return &Uploads{
 		unsafe: make(map[string]*Upload),
-		bus:    make(chan Chunk),
+		fs:     fs,
+		log:    log,
 	}
 }

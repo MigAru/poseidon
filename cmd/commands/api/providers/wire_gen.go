@@ -15,6 +15,7 @@ import (
 	"github.com/MigAru/poseidon/internal/logger"
 	"github.com/MigAru/poseidon/internal/manifest"
 	"github.com/MigAru/poseidon/internal/ping"
+	"github.com/MigAru/poseidon/internal/upload"
 )
 
 // Injectors from wire.go:
@@ -30,7 +31,8 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 	}
 	pingController := ping.NewPingController()
 	fs := file_system.New(configConfig)
-	controller := blob.NewController(logrusLogger, fs)
+	manager := upload.NewManager(ctx, configConfig, fs, logrusLogger)
+	controller := blob.NewController(logrusLogger, configConfig, fs, manager)
 	baseController := base.NewController(logrusLogger)
 	manifestController := manifest.NewController(logrusLogger, fs)
 	server := ServerProvider(configConfig, logrusLogger, pingController, controller, baseController, manifestController)

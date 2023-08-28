@@ -1,15 +1,26 @@
 package upload
 
-func (u *Upload) Done(digest string, finalChunk []byte) error {
+import (
+	"errors"
+)
+
+func (u *Upload) Done(digest string, finalChunk []byte) (int, error) {
 	blobBytes, err := u.fs.GetBlob(u.ID)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	blobBytes = append(blobBytes, finalChunk...)
 	//so that the worker does not delay ahead of create digest
-	if err := u.fs.CreateDigest(u.ProjectName, digest, blobBytes); err != nil {
-		return err
+
+	if u.TotalSize != len(blobBytes) {
+		return 0, errors.New("short download")
 	}
-	u.CancelFunc()
-	return nil
+
+	if err := u.fs.CreateDigest(u.ProjectName, digest, blobBytes); err != nil {
+		return 0, err
+	}
+
+	defer u.cancel()
+
+	return len(blobBytes), nil
 }

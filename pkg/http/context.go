@@ -21,6 +21,7 @@ type Context interface {
 	Redirect(location string, status int) error
 	Header(key string) string
 	SetHeader(key string, val string)
+	SetHeaders([]Header)
 	OctetStream(code int, data []byte)
 }
 
