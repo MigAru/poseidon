@@ -16,18 +16,25 @@ func New() *Hasher {
 	return &Hasher{}
 }
 
-func (f *Hasher) Build(method string) (hash.Hash, error) {
+func (f *Hasher) Build(method string, data []byte) (hash.Hash, error) {
 	switch method {
 	case methods.SHA224:
-		return sha256.New224(), nil
+		return f.createHasher(sha256.New224(), data)
 	case methods.SHA256:
-		return sha256.New(), nil
+		return f.createHasher(sha256.New(), data)
 	case methods.SHA384:
-		return sha512.New384(), nil
+		return f.createHasher(sha512.New384(), data)
 	case methods.SHA512:
-		return sha512.New(), nil
+		return f.createHasher(sha512.New(), data)
 	case methods.MD5:
-		return md5.New(), nil
+		return f.createHasher(md5.New(), data)
 	}
 	return nil, errors.NotSupportedMethod
+}
+
+func (f *Hasher) createHasher(hasher hash.Hash, data []byte) (hash.Hash, error) {
+	if _, err := hasher.Write(data); err != nil {
+		return nil, err
+	}
+	return hasher, nil
 }

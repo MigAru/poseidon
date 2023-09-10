@@ -16,6 +16,7 @@ import (
 	"github.com/MigAru/poseidon/internal/manifest"
 	"github.com/MigAru/poseidon/internal/ping"
 	"github.com/MigAru/poseidon/internal/upload"
+	"github.com/MigAru/poseidon/pkg/registry/hasher"
 )
 
 // Injectors from wire.go:
@@ -31,10 +32,12 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 	}
 	pingController := ping.NewPingController()
 	fs := file_system.New(configConfig)
-	manager := upload.NewManager(ctx, configConfig, fs, logrusLogger)
+	hasherHasher := hasher.New()
+	manager := upload.NewManager(ctx, configConfig, fs, hasherHasher, logrusLogger)
 	controller := blob.NewController(logrusLogger, configConfig, fs, manager)
 	baseController := base.NewController(logrusLogger)
-	manifestController := manifest.NewController(logrusLogger, fs)
+	manifestManager := manifest.NewManager(fs)
+	manifestController := manifest.NewController(logrusLogger, fs, manager, manifestManager)
 	server := ServerProvider(configConfig, logrusLogger, pingController, controller, baseController, manifestController)
 	backend, cleanup2, err := ServiceProvider(ctx, server)
 	if err != nil {

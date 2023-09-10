@@ -1,61 +1,50 @@
 package manifest
 
 import (
-	"crypto/sha256"
-	"encoding/json"
 	"fmt"
-	"github.com/MigAru/poseidon/internal/file_system"
+	"github.com/MigAru/poseidon/internal/upload"
 	"github.com/MigAru/poseidon/pkg/http"
-	v2_2 "github.com/MigAru/poseidon/pkg/registry/manifest/schema/v2.2"
+	"github.com/MigAru/poseidon/pkg/registry/hasher/methods"
 	"github.com/sirupsen/logrus"
 	"io"
-	"strconv"
 	"strings"
 )
 
 type Controller struct {
-	log *logrus.Logger
-	fs  *file_system.FS
+	log      *logrus.Logger
+	manifest *Manager
+	uploads  *upload.Manager
 }
 
-//TODO: сделать manifest manager
 //TODO: сделать обработку ошибок
 
-func NewController(log *logrus.Logger, fs *file_system.FS) *Controller {
+func NewController(log *logrus.Logger, uploads *upload.Manager, manifest *Manager) *Controller {
 	return &Controller{
-		log: log,
-		fs:  fs,
+		log:      log,
+		manifest: manifest,
+		uploads:  uploads,
 	}
 }
 
-func (c *Controller) Get(ctx http.Context) (err error) {
+func (c *Controller) Get(ctx http.Context) error {
 	//TODO: сделать валидацию на project и reference
 	var (
 		project   = ctx.Param("project")
-		filename  = ctx.Param("reference")
-		fileBytes []byte
+		reference = ctx.Param("reference")
 	)
-	params := file_system.NewGetParamsManifest(project, filename)
-	if !c.isDigest(filename) {
-		filename, err = c.fs.GetManifest(params)
-		if err != nil {
-			return
-		}
-	}
-	fileBytes, err = c.fs.GetDigest(project, filename)
+
+	manifest, digest, err := c.manifest.Get(project, reference)
 	if err != nil {
-		return
-	}
-	//TODO: сделать универсальный unmarshaler для manifest v2 v1/oci/manifest list v2
-	var manifest v2_2.Manifest
-	if err := json.Unmarshal(fileBytes, &manifest); err != nil {
 		return err
 	}
-	//TODO: сделать header builder
-	ctx.SetHeader("Docker-Content-Digest", filename)
-	ctx.SetHeader("Content-Type", manifest.MediaType)
-	ctx.SetHeader("Content-Length", strconv.Itoa(manifest.GetLength()))
-	ctx.JSON(200, &manifest)
+	fmt.Println(manifest.GetLength())
+	headers := http.NewRegisryHeadersParams().
+		WithDigest(digest).
+		WithContentType(manifest.MediaType).
+		WithContentLength(manifest.GetLength())
+
+	ctx.SetHeaders(http.CreateRegistryHeaders(headers))
+	ctx.JSON(200, manifest)
 	return nil
 }
 
@@ -65,59 +54,34 @@ func (c *Controller) isDigest(name string) bool {
 }
 
 func (c *Controller) Create(ctx http.Context) error {
-	//TODO: сделать валидацию на пустые проекты и референсы
 	var (
 		project   = ctx.Param("project")
 		reference = ctx.Param("reference")
 	)
-	b, err := io.ReadAll(ctx.Body())
+
+	data, err := io.ReadAll(ctx.Body())
 	if err != nil {
 		return err
 	}
 
-	hasher := sha256.New()
-	hasher.Write(b)
-	hash := fmt.Sprintf("sha256:%x", hasher.Sum(nil))
-
-	params := file_system.NewCreateParamsManifest(project, reference)
-	if err := c.fs.CreateManifest(params.WithFilename(hash).WithData(b)); err != nil {
-		ctx.NoContent(400)
+	hash, err := c.uploads.UploadManifest(project, reference, methods.SHA256, data)
+	if err != nil {
 		return err
 	}
 
-	if err := c.fs.CreateDigest(project, hash, b); err != nil {
-		ctx.NoContent(400)
-		return err
-	}
-	//TODO: сделать перенаправление на blob endpoints
-	//TODO: сделать header builder
 	location := "/v2/" + ctx.Param("name") + "/manifest/" + hash
-	ctx.SetHeader("Location", location)
-	ctx.SetHeader("Docker-Content-Digest", hash)
+	headers := http.NewRegisryHeadersParams().WithLocation(location).WithDigest(hash)
+	ctx.SetHeaders(http.CreateRegistryHeaders(headers))
 	ctx.NoContent(201)
 	return nil
 }
 
-func (c *Controller) Delete(ctx http.Context) (err error) {
-	//TODO: сделать после менеджера загрузки
-	reference := ctx.Param("tag")
+func (c *Controller) Delete(ctx http.Context) error {
 	project := ctx.Param("project")
-	if !c.isDigest(reference) {
-		params := file_system.NewGetParamsManifest(project, reference)
-		reference, err = c.fs.GetManifest(params)
-		if err != nil {
-			return err
-		}
-	}
+	reference := ctx.Param("reference")
 
-	err = c.fs.DeleteManifest(file_system.NewBaseParamsManifest(project, reference))
-	if err != nil {
-		return
+	if err := c.manifest.Delete(project, reference); err != nil {
+		return err
 	}
-
-	err = c.fs.DeleteDigest(ctx.Param("name"), reference)
-	if err != nil {
-		return
-	}
-	return
+	return nil
 }

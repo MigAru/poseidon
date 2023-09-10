@@ -9,9 +9,8 @@ func (u *Upload) Done(digest string, finalChunk []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	blobBytes = append(blobBytes, finalChunk...)
-	//so that the worker does not delay ahead of create digest
 
+	blobBytes = append(blobBytes, finalChunk...)
 	if u.TotalSize != len(blobBytes) {
 		return 0, errors.New("short download")
 	}

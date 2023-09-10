@@ -1,9 +1,7 @@
 package file_system
 
 import (
-	"bytes"
 	"errors"
-	"io"
 	"os"
 	"path"
 )
@@ -97,7 +95,7 @@ func (f *FS) CreateManifest(params *CreateParamsManifest) error {
 		return err
 	}
 	for _, file := range files {
-		if err := os.Remove(file.Name()); err != nil {
+		if err := os.Remove(manifestPath + "/" + file.Name()); err != nil {
 			return err
 		}
 	}
@@ -107,9 +105,7 @@ func (f *FS) CreateManifest(params *CreateParamsManifest) error {
 	}
 
 	defer file.Close()
-
-	_, err = io.Copy(file, bytes.NewBuffer([]byte(params.Filename)))
-	if err != nil {
+	if _, err := file.Write([]byte(params.Filename)); err != nil {
 		if err := os.RemoveAll(path.Join(f.basePath, "manifests", params.Project)); err != nil {
 			return err
 		}
