@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"github.com/MigAru/poseidon/internal/upload"
 	"github.com/MigAru/poseidon/pkg/http"
+	"github.com/MigAru/poseidon/pkg/registry/errors"
 	"github.com/MigAru/poseidon/pkg/registry/hasher/methods"
 	"github.com/sirupsen/logrus"
 	"io"
+	http2 "net/http"
+	"os"
 	"strings"
 )
 
@@ -34,10 +37,15 @@ func (c *Controller) Get(ctx http.Context) error {
 	)
 
 	manifest, digest, err := c.manifest.Get(project, reference)
-	if err != nil {
+	if os.IsNotExist(err) {
+		ctx.JSON(http2.StatusNotFound, errors.NewErrorResponse(errors.NameUnknown))
 		return err
 	}
-	fmt.Println(manifest.GetLength())
+	if err != nil {
+		ctx.JSON(http2.StatusBadRequest, errors.NewErrorResponse(errors.GetManifest))
+		return err
+	}
+
 	headers := http.NewRegisryHeadersParams().
 		WithDigest(digest).
 		WithContentType(manifest.MediaType).
@@ -61,15 +69,17 @@ func (c *Controller) Create(ctx http.Context) error {
 
 	data, err := io.ReadAll(ctx.Body())
 	if err != nil {
+		ctx.JSON(http2.StatusBadRequest, errors.NewErrorResponse(errors.GetManifest))
 		return err
 	}
-
+	//TODO: сделать разбитие reference и парсинг метода
 	hash, err := c.uploads.UploadManifest(project, reference, methods.SHA256, data)
 	if err != nil {
+		ctx.JSON(http2.StatusBadRequest, errors.NewErrorResponse(errors.CreateManifest))
 		return err
 	}
 
-	location := "/v2/" + ctx.Param("name") + "/manifest/" + hash
+	location := fmt.Sprintf("/v2/%s/manifest/%s", ctx.Param("name"), hash)
 	headers := http.NewRegisryHeadersParams().WithLocation(location).WithDigest(hash)
 	ctx.SetHeaders(http.CreateRegistryHeaders(headers))
 	ctx.NoContent(201)
@@ -81,6 +91,7 @@ func (c *Controller) Delete(ctx http.Context) error {
 	reference := ctx.Param("reference")
 
 	if err := c.manifest.Delete(project, reference); err != nil {
+		ctx.NoContent(http2.StatusInternalServerError)
 		return err
 	}
 	return nil
