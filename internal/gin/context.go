@@ -18,6 +18,10 @@ func WrapContext(ctx *gin.Context) httpInterface.Context {
 	return &Context{gctx: ctx}
 }
 
+func (c *Context) AbortWithJson(code int, i any) {
+	c.gctx.AbortWithStatusJSON(code, i)
+}
+
 func (c *Context) JSON(code int, i any) {
 	c.gctx.JSON(code, i)
 }
@@ -70,7 +74,11 @@ func (c *Context) Header(key string) string {
 func (c *Context) SetHeader(key string, value string) {
 	c.gctx.Header(key, value)
 }
-
+func (c *Context) SetHeaders(headers []httpInterface.Header) {
+	for _, header := range headers {
+		c.gctx.Header(header.Key, header.Value)
+	}
+}
 func (c *Context) OctetStream(code int, data []byte) {
 	c.gctx.Data(code, "application/octet-stream", data)
 }

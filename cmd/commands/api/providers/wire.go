@@ -12,6 +12,8 @@ import (
 	"github.com/MigAru/poseidon/internal/logger"
 	"github.com/MigAru/poseidon/internal/manifest"
 	"github.com/MigAru/poseidon/internal/ping"
+	"github.com/MigAru/poseidon/internal/upload"
+	"github.com/MigAru/poseidon/pkg/registry/hasher"
 	"github.com/google/wire"
 )
 
@@ -22,9 +24,12 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 		config.NewFromEnv,
 		logger.NewLogrus,
 		file_system.New,
+		hasher.New,
+		upload.NewManager,
 		ping.NewPingController,
 		base.NewController,
 		blob.NewController,
+		manifest.NewManager,
 		manifest.NewController,
 		ServerProvider,
 		ServiceProvider,

@@ -12,25 +12,29 @@ func (f *FS) GetBlob(name string) ([]byte, error) {
 }
 
 func (f *FS) normalizePath(name string) string {
-	return path.Join(f.basePath, name)
+	return path.Join(f.basePath, "blobs", name)
 }
 
-func (f *FS) CreateBlob(name string, data []byte) error {
+func (f *FS) UploadBlob(name string, data []byte) error {
 	name = f.normalizePath(name)
-	err := os.MkdirAll(f.basePath, 0750)
+	err := os.MkdirAll(f.basePath+"/blobs", 0750)
 	if err != nil && !os.IsExist(err) {
 		return err
 	}
-	perm := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
+	perm := os.O_CREATE | os.O_APPEND | os.O_WRONLY
 	file, err := os.OpenFile(name, perm, 0750)
 	if err != nil {
 		return err
 	}
+
 	defer file.Close()
 
 	_, err = io.Copy(file, bytes.NewBuffer(data))
 	if err != nil {
-		os.Remove(name)
+		//dump error handle
+		if err := os.Remove(name); err != nil {
+			return err
+		}
 		return err
 	}
 	return nil

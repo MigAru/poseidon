@@ -11,14 +11,14 @@ import (
 func (f *FS) GetDigest(project, name string) ([]byte, error) {
 	ar := strings.Split(name, ":")
 	algo, hash := ar[0], ar[1]
-	digestPath := path.Join(f.basePath, project, algo, hash[:3], name)
+	digestPath := path.Join(f.basePath, "repos", project, algo, hash[:3], name)
 	return os.ReadFile(digestPath)
 }
 
 func (f *FS) CreateDigest(project, name string, data []byte) error {
 	ar := strings.Split(name, ":")
 	algo, hash := ar[0], ar[1]
-	digestPath := path.Join(f.basePath, project, algo, hash[:3])
+	digestPath := path.Join(f.basePath, "repos", project, algo, hash[:3])
 	err := os.MkdirAll(digestPath, 0750)
 	if err != nil && !os.IsExist(err) {
 		return err
@@ -33,6 +33,7 @@ func (f *FS) CreateDigest(project, name string, data []byte) error {
 	if err != nil {
 		return err
 	}
+
 	defer file.Close()
 
 	_, err = io.Copy(file, bytes.NewBuffer(data))

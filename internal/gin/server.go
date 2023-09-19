@@ -7,11 +7,10 @@ import (
 	"github.com/MigAru/poseidon/internal/config"
 	"github.com/MigAru/poseidon/internal/manifest"
 	"github.com/MigAru/poseidon/internal/ping"
-	"net/http"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"net/http"
+	"time"
 )
 
 type Server struct {
@@ -22,6 +21,8 @@ type Server struct {
 
 	server *http.Server
 }
+
+//TODO: вынести отдельный контроллер на upload
 
 func NewServer(
 	cfg *config.Config,
@@ -51,14 +52,22 @@ func (s *Server) registerControllers(
 	s.registerPingController(ping)
 
 	APIv2Group := s.mainController.Group("/v2/")
+
 	APIv2Group.GET("", func(ctx *gin.Context) {
 		if err := baseController.V2(WrapContext(ctx)); err != nil {
 			s.log.Error(err.Error())
 		}
 	})
+
+	APIv2Group.Use(s.validateProjectNameMiddleware)
 	s.registerManifestController(APIv2Group, ":project/manifests/:reference", manifestController)
+	s.registerManifestController(APIv2Group, ":project/:project-sub-name/manifests/:reference", manifestController)
+
 	s.registerBlobController(APIv2Group, ":project/blobs/:digest", blobController)
+	s.registerBlobController(APIv2Group, ":project/:project-sub-name/blobs/:digest", blobController)
+
 	s.registerUploadController(APIv2Group, ":project/blobs/uploads/", blobController)
+	s.registerUploadController(APIv2Group, ":project/:project-sub-name/blobs/uploads/", blobController)
 }
 
 func (s *Server) registerPingController(controller *ping.PingController) {

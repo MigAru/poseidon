@@ -21,5 +21,9 @@ func (s *Server) registerManifestController(group *gin.RouterGroup, pattern stri
 			s.log.Error(err.Error())
 		}
 	})
-
+	group.DELETE(pattern, func(ctx *gin.Context) {
+		if err := controller.Delete(WrapContext(ctx)); err != nil {
+			s.log.Error(err.Error())
+		}
+	})
 }

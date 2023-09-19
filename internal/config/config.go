@@ -9,6 +9,7 @@ type Config struct {
 	DebugMode  bool       `env:"DEBUG_MODE" envDefault:"true"`
 	FileSystem FileSystem `env:"FILE_SYSTEM_"`
 	Server     Server     `envPrefix:"SERVER_"`
+	Upload     Upload     `envPrefix:"UPLOAD_"`
 }
 
 func NewFromEnv() (*Config, error) {
