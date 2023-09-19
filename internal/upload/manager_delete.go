@@ -1,5 +1,5 @@
 package upload
 
-func (m *Manager) Delete(id string) error {
+func (m *Manager) DeleteUpload(id string) error {
 	return m.uploads.delete(id)
 }
