@@ -9,7 +9,7 @@ import (
 
 func (c *Controller) PutUpload(ctx http.Context) error {
 	var (
-		project = ctx.Param("project")
+		project = http.GetProjectName(ctx)
 		uuid    = ctx.Param("uuid")
 		digest  = ctx.QueryParam("digest")
 	)

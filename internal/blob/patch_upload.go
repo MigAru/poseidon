@@ -5,12 +5,13 @@ import (
 	"github.com/MigAru/poseidon/pkg/registry/errors"
 	"io/ioutil"
 	httpInterface "net/http"
+	"strings"
 )
 
 func (c *Controller) Upload(ctx http.Context) error {
 	//TODO: разнести upload на patch и put
 	var (
-		project = ctx.Param("project")
+		project = http.GetProjectName(ctx)
 		uuid    = ctx.Param("uuid")
 		digest  = ctx.QueryParam("digest")
 	)
@@ -36,7 +37,7 @@ func (c *Controller) Upload(ctx http.Context) error {
 			return err
 		}
 
-		uploadURL := "/v2/" + project + "/blobs/upload/" + uuid
+		uploadURL := "/v2/" + strings.ReplaceAll(project, ".", "/") + "/blobs/upload/" + uuid
 
 		headers := http.NewRegisryHeadersParams().WithLocation(uploadURL).WithRange(0, written).WithUUID(uuid)
 		ctx.SetHeaders(http.CreateRegistryHeaders(headers))
