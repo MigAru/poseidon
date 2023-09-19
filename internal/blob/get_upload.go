@@ -7,10 +7,7 @@ import (
 )
 
 func (c *Controller) GetUpload(ctx http.Context) error {
-
-	var (
-		uuid = ctx.Param("uuid")
-	)
+	var uuid = ctx.Param("uuid")
 
 	blob, ok := c.manager.Get(uuid)
 	if !ok {

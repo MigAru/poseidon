@@ -10,26 +10,20 @@ import (
 
 func (c *Controller) CreateUpload(ctx http.Context) error {
 	// создание загрузки
-	//TODO: реализовать менеджер загрузок и после реализовать двойное наименование name/subName:tag
-	name := ctx.Param("project")
-	subName := ctx.Param("sub-name-project")
-	projectName := name
-	if subName != "" {
-		projectName += "." + subName
-	}
+	project := http.GetProjectName(ctx)
 
 	totalSize, err := strconv.Atoi(ctx.Header("Content-Length"))
-	if err != nil {
+	if err == nil {
 		ctx.NoContent(httpInterface.StatusBadRequest)
 		return err
 	}
-	id, err := c.manager.Create(context.Background(), projectName, totalSize)
+	id, err := c.manager.Create(context.Background(), project, totalSize)
 	if err != nil {
 		ctx.NoContent(httpInterface.StatusBadRequest)
 		return err
 	}
 
-	uploadURL := "/v2/" + strings.ReplaceAll(projectName, ".", "/") + "/blobs/uploads/" + id
+	uploadURL := "/v2/" + strings.ReplaceAll(project, ".", "/") + "/blobs/uploads/" + id
 
 	headers := http.NewRegisryHeadersParams().WithLocation(uploadURL).WithRange(0, 0).WithUUID(id)
 	ctx.SetHeaders(http.CreateRegistryHeaders(headers))

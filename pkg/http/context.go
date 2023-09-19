@@ -8,7 +8,8 @@ import (
 )
 
 type Context interface {
-	JSON(code int, i interface{})
+	AbortWithJson(code int, i any) //Не использовать. Не понятно почему, но не работает, пофиксить
+	JSON(code int, i any)
 	Bind(i any) error
 	FormFile(name string) (*multipart.FileHeader, error)
 	Body() io.ReadCloser

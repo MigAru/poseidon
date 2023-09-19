@@ -18,6 +18,10 @@ func WrapContext(ctx *gin.Context) httpInterface.Context {
 	return &Context{gctx: ctx}
 }
 
+func (c *Context) AbortWithJson(code int, i any) {
+	c.gctx.AbortWithStatusJSON(code, i)
+}
+
 func (c *Context) JSON(code int, i any) {
 	c.gctx.JSON(code, i)
 }

@@ -63,7 +63,7 @@ func (c *Controller) isDigest(name string) bool {
 
 func (c *Controller) Create(ctx http.Context) error {
 	var (
-		project   = ctx.Param("project")
+		project   = http.GetProjectName(ctx)
 		reference = ctx.Param("reference")
 	)
 
@@ -79,7 +79,7 @@ func (c *Controller) Create(ctx http.Context) error {
 		return err
 	}
 
-	location := fmt.Sprintf("/v2/%s/manifest/%s", ctx.Param("name"), hash)
+	location := fmt.Sprintf("/v2/%s/manifest/%s", strings.ReplaceAll(project, ".", "/"), hash)
 	headers := http.NewRegisryHeadersParams().WithLocation(location).WithDigest(hash)
 	ctx.SetHeaders(http.CreateRegistryHeaders(headers))
 	ctx.NoContent(201)
