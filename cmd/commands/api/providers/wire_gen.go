@@ -33,7 +33,7 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 	pingController := ping.NewPingController()
 	fs := file_system.New(configConfig)
 	hasherHasher := hasher.New()
-	manager := upload.NewManager(ctx, configConfig, fs, hasherHasher, logrusLogger)
+	manager := upload.NewManager(ctx, fs, hasherHasher, logrusLogger)
 	controller := blob.NewController(logrusLogger, configConfig, fs, manager)
 	baseController := base.NewController(logrusLogger)
 	manifestManager := manifest.NewManager(fs)

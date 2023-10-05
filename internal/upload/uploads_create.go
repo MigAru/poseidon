@@ -1,12 +1,11 @@
 package upload
 
 import (
-	"context"
 	"github.com/google/uuid"
 	"time"
 )
 
-func (u *Uploads) Create(ctx context.Context, params CreateParams) (string, error) {
+func (u *Uploads) Create(params CreateParams) (string, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return id.String(), err
@@ -20,7 +19,7 @@ func (u *Uploads) Create(ctx context.Context, params CreateParams) (string, erro
 		WithTotalSize(params.TotalSize).
 		WithTimeout(params.Timeout)
 
-	upload := InitUpload(ctx, uploadParams)
+	upload := InitUpload(uploadParams)
 	u.unsafe[id.String()] = upload
 
 	return id.String(), nil

@@ -1,7 +1,6 @@
 package upload
 
 import (
-	"context"
 	"github.com/MigAru/poseidon/internal/file_system"
 	"github.com/sirupsen/logrus"
 	"time"
@@ -10,17 +9,12 @@ import (
 type Upload struct {
 	ID            string
 	ProjectName   string
-	Monotonic     bool
 	ChunkNum      int //for calculate +- size get
 	log           *logrus.Entry
-	timeout       time.Duration //deadline routine
-	ctx           context.Context
-	cancel        context.CancelFunc
 	fs            *file_system.FS
 	TotalSize     int
 	UploadedBytes int //for final check
 	Errors        []error
-	Queue         chan []byte
 }
 
 type Chunk struct {
@@ -63,18 +57,12 @@ func (p *InitUploadParams) WithLogger(log *logrus.Logger) *InitUploadParams {
 	return p
 }
 
-func InitUpload(ctx context.Context, params *InitUploadParams) *Upload {
-	uploadCTX, cancel := context.WithCancel(ctx)
-
+func InitUpload(params *InitUploadParams) *Upload {
 	return &Upload{
 		ID:          params.ID,
-		timeout:     params.Timeout,
 		log:         logrus.WithField("prefix", "upload"),
 		fs:          params.FS,
-		ctx:         uploadCTX,
-		cancel:      cancel,
 		ProjectName: params.ProjectName,
 		TotalSize:   params.TotalSize,
-		Queue:       make(chan []byte),
 	}
 }

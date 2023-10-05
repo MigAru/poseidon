@@ -1,7 +1,6 @@
 package blob
 
 import (
-	"context"
 	"github.com/MigAru/poseidon/pkg/http"
 	httpInterface "net/http"
 	"strconv"
@@ -17,7 +16,7 @@ func (c *Controller) CreateUpload(ctx http.Context) error {
 		ctx.NoContent(httpInterface.StatusBadRequest)
 		return err
 	}
-	id, err := c.manager.Create(context.Background(), project, totalSize)
+	id, err := c.manager.Create(project, totalSize)
 	if err != nil {
 		ctx.NoContent(httpInterface.StatusBadRequest)
 		return err
