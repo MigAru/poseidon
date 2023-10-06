@@ -61,19 +61,13 @@ func (l *LRU) Update(key, value string) error {
 		if ok := l.cacheWithTTL.Remove(key); !ok {
 			return errors.New("element not found ")
 		}
-		ok := l.cacheWithTTL.Add(key, value)
-		if !ok {
-			return errors.New("")
-		}
+		l.cacheWithTTL.Add(key, value)
 		return nil
 	}
 	if ok := l.cache.Remove(key); !ok {
 		return errors.New("element not found ")
 	}
-	ok := l.cache.Add(key, value)
-	if !ok {
-		return errors.New("")
-	}
+	l.cache.Add(key, value)
 	return nil
 }
 

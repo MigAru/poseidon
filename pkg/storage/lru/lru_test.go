@@ -113,6 +113,59 @@ func evictedTest(t *testing.T, lru *LRU) {
 	assert.EqualValues(t, expected, value)
 }
 
-func TestDelete(t *testing.T) {}
+func TestDelete(t *testing.T) {
+	lru, err := New(logrus.New(), 1, nil)
+	assert.NoError(t, err, "err create lru assert")
 
-func TestUpdate(t *testing.T) {}
+	deleteTest(t, lru)
+
+	ttl := time.Second * 2
+	lru, err = New(logrus.New(), 1, &ttl)
+	assert.NoError(t, err, "err create lru assert")
+
+	deleteTest(t, lru)
+
+}
+
+func deleteTest(t *testing.T, lru *LRU) {
+	err := lru.Create("test", "test")
+	assert.NoError(t, err, "err create element assert")
+
+	err = lru.Delete("test")
+	assert.NoError(t, err, "err create element assert")
+
+	_, err = lru.Get("test")
+	assert.Error(t, err)
+}
+
+func TestUpdate(t *testing.T) {
+	lru, err := New(logrus.New(), 1, nil)
+	assert.NoError(t, err, "err create lru assert")
+
+	updateTest(t, lru)
+
+	ttl := time.Second * 2
+	lru, err = New(logrus.New(), 1, &ttl)
+	assert.NoError(t, err, "err create lru assert")
+
+	updateTest(t, lru)
+}
+
+func updateTest(t *testing.T, lru *LRU) {
+	err := lru.Create("test", "test")
+	assert.NoError(t, err, "err create element assert")
+
+	value, err := lru.Get("test")
+	assert.NoError(t, err)
+	assert.EqualValues(t, "test", value)
+
+	err = lru.Update("test", "test2")
+	assert.NoError(t, err)
+
+	err = lru.Update("test2", "test2")
+	assert.Error(t, err)
+
+	value, err = lru.Get("test")
+	assert.NoError(t, err)
+	assert.EqualValues(t, "test2", value)
+}
