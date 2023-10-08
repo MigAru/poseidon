@@ -17,6 +17,7 @@ func NewLocker(log logrus.Logger, st storage.ST) Locker {
 	return Locker{log: log, storage: st}
 }
 
+//Metadata - for create queue or detect deadlock and more
 type Metadata struct {
 	CreatedAt time.Time `json:"created_at"` //time for detect deadlock(if ttl over big)
 }
