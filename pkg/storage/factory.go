@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"github.com/MigAru/poseidon/pkg/storage/lru"
 	"github.com/sirupsen/logrus"
 	"time"
 )
@@ -8,10 +9,10 @@ import (
 type STFactory struct {
 	log  *logrus.Logger
 	size int
-	ttl  time.Duration
+	ttl  *time.Duration
 }
 
-func NewSTFactory(log *logrus.Logger, size int, ttl time.Duration) *STFactory {
+func NewSTFactory(log *logrus.Logger, size int, ttl *time.Duration) *STFactory {
 	return &STFactory{
 		log:  log,
 		size: size,
@@ -22,8 +23,7 @@ func NewSTFactory(log *logrus.Logger, size int, ttl time.Duration) *STFactory {
 func (stf *STFactory) Build(typeST int) *ST {
 	switch typeST {
 	case LRU:
-
-	case Redis:
+		lru.New(stf.log, stf.size, stf.ttl)
 	}
 	panic("not supported type of ST")
 }
