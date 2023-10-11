@@ -3,5 +3,5 @@ package migrations
 import "embed"
 
 // Файлы с миграциями
-//go:embed migrations/*
+//go:embed schemas/*
 var Migrations embed.FS
