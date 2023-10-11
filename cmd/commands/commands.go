@@ -22,7 +22,7 @@ func Register(rootCommand *cobra.Command) {
 
 func SetDefaultCommandIfNonePresent(rootCmd *cobra.Command) {
 	cmd, _, err := rootCmd.Find(os.Args[1:])
-	if err != nil || cmd.Args == nil {
+	if err != nil || cmd == nil {
 		args := append([]string{NameDefaultCommand}, os.Args[1:]...)
 		rootCmd.SetArgs(args)
 	}

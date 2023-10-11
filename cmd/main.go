@@ -3,10 +3,13 @@ package main
 import (
 	"github.com/MigAru/poseidon/cmd/commands"
 	_ "github.com/MigAru/poseidon/cmd/commands/api"
+	_ "github.com/MigAru/poseidon/cmd/commands/migrate"
 	"github.com/spf13/cobra"
 )
 
-var rootCMD = &cobra.Command{}
+var (
+	rootCMD = &cobra.Command{}
+)
 
 func main() {
 	commands.Register(rootCMD)
