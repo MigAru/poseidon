@@ -3,32 +3,43 @@ package sqlite
 import (
 	"database/sql"
 	"github.com/MigAru/poseidon/internal/database"
+	"github.com/huandu/go-sqlbuilder"
 )
 
-type RepositoryModel struct {
-	reference sql.NullString
-	tag       sql.NullString
-	createdAt sql.NullTime
-	updatedAt sql.NullTime
-	attrs     sql.NullString
-}
-type RepositoryAttrsModel struct {
-}
-
 func (db *DB) GetRepository(reference, tag string) (*database.Repository, error) {
-	row := db.conn.QueryRow(`
-					SELECT 
-					    reference, 
-					    tag, 
-					    created_at, 
-					    updated_at, 
-					    attrs 
-					FROM 
-					    repository 
-					WHERE 
-					    reference = $1 and 
-					    tag = $2`, reference, tag)
+	sb := sqlbuilder.NewSelectBuilder()
+
+	sb.Select("reference", "tag", "digest", "created_at", "updated_at", "attrs")
+	sb.From("repository")
+	sb.Where(sb.Equal("reference", reference), sb.Equal("tag", tag))
+
+	sqlRaw, args := sb.Build()
+	row := db.conn.QueryRow(sqlRaw, args...)
 	if row.Err() != nil {
 		return nil, row.Err()
 	}
+
+	var (
+		model    database.RepositoryModel
+		attrsRaw sql.NullString
+	)
+
+	if err := row.Scan(
+		&model.Reference,
+		&model.Tag,
+		&model.Digest,
+		&model.CreatedAt,
+		&model.UpdatedAt,
+		&attrsRaw,
+	); err != nil {
+		return nil, err
+	}
+
+	attrs, err := database.RepositoryAttrsFromRaw(attrsRaw.String)
+	if err != nil {
+		return nil, err
+	}
+	model.Attrs = attrs
+
+	return database.FromModelToRepository(model), nil
 }
