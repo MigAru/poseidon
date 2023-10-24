@@ -7,13 +7,14 @@ import (
 )
 
 func (db *DB) GetRepository(reference, tag string) (*database.Repository, error) {
-	sb := sqlbuilder.NewSelectBuilder()
+	builder := sqlbuilder.NewSelectBuilder()
 
-	sb.Select("reference", "tag", "digest", "created_at", "updated_at", "attrs")
-	sb.From("repository")
-	sb.Where(sb.Equal("reference", reference), sb.Equal("tag", tag))
+	builder.Select("r.id", "r.reference", "r.tag", "r.digest", "r.created_at", "r.updated_at")
+	builder.From("repository r")
+	builder.JoinWithOption(sqlbuilder.RightJoin, "repository_delete rd", "rd.repository_id=r.id")
+	builder.Where(builder.Equal("reference", reference), builder.Equal("tag", tag), builder.IsNotNull("rb.id"))
 
-	sqlRaw, args := sb.Build()
+	sqlRaw, args := builder.Build()
 	row := db.conn.QueryRow(sqlRaw, args...)
 	if row.Err() != nil {
 		return nil, row.Err()
@@ -25,6 +26,7 @@ func (db *DB) GetRepository(reference, tag string) (*database.Repository, error)
 	)
 
 	if err := row.Scan(
+		&model.ID,
 		&model.Reference,
 		&model.Tag,
 		&model.Digest,

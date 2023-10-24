@@ -13,7 +13,7 @@ func newCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg := newConfig()
 			if cfg == nil {
-				panic("config is nil")
+				panic("in parse cfg has been error")
 			}
 
 		},
