@@ -6,7 +6,15 @@ help:
 gen-api: # generate api file
 	cd ./cmd/commands/api/providers && ~/go/bin/wire; cd ../..
 
-migrate-sqlite: #migrate command to
+migrate-up-sqlite: # up migrates command to db on driver sqlite3
+	go build -o migrator ./cmd/main.go
+	./migrator migrate up
+	rm migrator
+
+migrate-down-sqlite: # down migrates command for db on driver sqlite3
+	go build -o migrator ./cmd/main.go
+	./migrator migrate down
+	rm migrator
 
 run-api: # run docker container
 	docker run -d --name poseidon-api poseidon-api
