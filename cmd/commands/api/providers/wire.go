@@ -8,6 +8,7 @@ import (
 	"github.com/MigAru/poseidon/internal/base"
 	"github.com/MigAru/poseidon/internal/blob"
 	"github.com/MigAru/poseidon/internal/config"
+	"github.com/MigAru/poseidon/internal/database"
 	"github.com/MigAru/poseidon/internal/file_system"
 	"github.com/MigAru/poseidon/internal/logger"
 	"github.com/MigAru/poseidon/internal/manifest"
@@ -23,6 +24,7 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 	panic(wire.Build(
 		config.NewFromEnv,
 		logger.NewLogrus,
+		database.New,
 		file_system.New,
 		hasher.New,
 		upload.NewManager,

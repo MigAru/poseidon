@@ -1,18 +1,21 @@
 package sqlite
 
 import (
-	"database/sql"
-	"github.com/MigAru/poseidon/internal/database"
+	"github.com/MigAru/poseidon/internal/database/structs"
 	"github.com/huandu/go-sqlbuilder"
 )
 
-func (db *DB) GetRepository(reference, tag string) (*database.Repository, error) {
+func (db *DB) GetRepository(reference, tag string) (*structs.Repository, error) {
 	builder := sqlbuilder.SQLite.NewSelectBuilder()
 
 	builder.Select("r.id", "r.reference", "r.tag", "r.digest", "r.created_at", "r.updated_at")
 	builder.From("repository r")
-	builder.JoinWithOption(sqlbuilder.RightJoin, "repository_delete rd", "rd.repository_id=r.id")
-	builder.Where(builder.Equal("reference", reference), builder.Equal("tag", tag), builder.IsNotNull("rb.id"))
+	builder.JoinWithOption(sqlbuilder.LeftJoin, "repository_delete rd", "rd.repository_id=r.id")
+	builder.Where(
+		builder.Equal("r.reference", reference),
+		builder.Equal("r.tag", tag),
+		builder.IsNull("rd.repository_id"),
+	)
 
 	sqlRaw, args := builder.Build()
 	row := db.conn.QueryRow(sqlRaw, args...)
@@ -21,8 +24,7 @@ func (db *DB) GetRepository(reference, tag string) (*database.Repository, error)
 	}
 
 	var (
-		model    database.RepositoryModel
-		attrsRaw sql.NullString
+		model structs.RepositoryModel
 	)
 
 	if err := row.Scan(
@@ -32,16 +34,8 @@ func (db *DB) GetRepository(reference, tag string) (*database.Repository, error)
 		&model.Digest,
 		&model.CreatedAt,
 		&model.UpdatedAt,
-		&attrsRaw,
 	); err != nil {
 		return nil, err
 	}
-
-	attrs, err := database.RepositoryAttrsFromRaw(attrsRaw.String)
-	if err != nil {
-		return nil, err
-	}
-	model.Attrs = attrs
-
-	return database.FromModelToRepository(model), nil
+	return structs.FromModelToRepository(model), nil
 }

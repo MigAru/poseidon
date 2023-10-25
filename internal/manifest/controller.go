@@ -2,6 +2,7 @@ package manifest
 
 import (
 	"fmt"
+	"github.com/MigAru/poseidon/internal/database"
 	"github.com/MigAru/poseidon/internal/upload"
 	"github.com/MigAru/poseidon/pkg/http"
 	"github.com/MigAru/poseidon/pkg/registry/errors"
@@ -16,15 +17,17 @@ import (
 type Controller struct {
 	log      *logrus.Logger
 	manifest *Manager
+	db       database.DB
 	uploads  *upload.Manager
 }
 
 //TODO: сделать обработку ошибок
 
-func NewController(log *logrus.Logger, uploads *upload.Manager, manifest *Manager) *Controller {
+func NewController(log *logrus.Logger, uploads *upload.Manager, manifest *Manager, db database.DB) *Controller {
 	return &Controller{
 		log:      log,
 		manifest: manifest,
+		db:       db,
 		uploads:  uploads,
 	}
 }
@@ -32,11 +35,15 @@ func NewController(log *logrus.Logger, uploads *upload.Manager, manifest *Manage
 func (c *Controller) Get(ctx http.Context) error {
 	//TODO: сделать валидацию на project и reference
 	var (
-		project   = ctx.Param("project")
+		project   = http.GetProjectName(ctx)
 		reference = ctx.Param("reference")
 	)
-
-	manifest, digest, err := c.manifest.Get(project, reference)
+	repository, err := c.db.GetRepository(project, reference)
+	if err != nil {
+		ctx.JSON(http2.StatusNotFound, errors.NewErrorResponse(errors.NameUnknown))
+		return err
+	}
+	manifest, digest, err := c.manifest.Get(project, repository.Digest)
 	if os.IsNotExist(err) {
 		ctx.JSON(http2.StatusNotFound, errors.NewErrorResponse(errors.NameUnknown))
 		return err
@@ -72,10 +79,16 @@ func (c *Controller) Create(ctx http.Context) error {
 		ctx.JSON(http2.StatusBadRequest, errors.NewErrorResponse(errors.GetManifest))
 		return err
 	}
+
 	//TODO: сделать разбитие reference и парсинг метода
-	hash, err := c.uploads.UploadManifest(project, reference, methods.SHA256, data)
+	hash, err := c.uploads.UploadManifest(project, methods.SHA256, data)
 	if err != nil {
 		ctx.JSON(http2.StatusBadRequest, errors.NewErrorResponse(errors.CreateManifest))
+		return err
+	}
+
+	if err := c.db.CreateRepository(project, reference, hash); err != nil {
+		ctx.NoContent(http2.StatusInternalServerError)
 		return err
 	}
 

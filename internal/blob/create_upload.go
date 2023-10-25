@@ -12,7 +12,7 @@ func (c *Controller) CreateUpload(ctx http.Context) error {
 	project := http.GetProjectName(ctx)
 
 	totalSize, err := strconv.Atoi(ctx.Header("Content-Length"))
-	if err == nil {
+	if err != nil {
 		ctx.NoContent(httpInterface.StatusBadRequest)
 		return err
 	}

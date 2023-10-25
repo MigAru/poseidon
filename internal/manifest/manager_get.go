@@ -2,7 +2,6 @@ package manifest
 
 import (
 	"encoding/json"
-	"github.com/MigAru/poseidon/internal/file_system"
 	v2_2 "github.com/MigAru/poseidon/pkg/registry/manifest/schema/v2.2"
 	"strings"
 )
@@ -14,13 +13,7 @@ func (m *Manager) Get(project, reference string) (v2_2.Manifest, string, error) 
 		fileBytes []byte
 		err       error
 	)
-	params := file_system.NewGetParamsManifest(project, reference)
-	if !m.isDigest(reference) {
-		filename, err = m.fs.GetManifest(params)
-		if err != nil {
-			return manifest, filename, err
-		}
-	}
+
 	fileBytes, err = m.fs.GetDigest(project, filename)
 	if err != nil {
 		return manifest, filename, err

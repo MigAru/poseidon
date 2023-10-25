@@ -1,11 +1,11 @@
 package sqlite
 
 import (
-	"github.com/MigAru/poseidon/internal/database"
+	"github.com/MigAru/poseidon/internal/database/structs"
 	"github.com/huandu/go-sqlbuilder"
 )
 
-func (db *DB) GetRepositoryByID(id string) (*database.Repository, error) {
+func (db *DB) GetRepositoryByID(id string) (*structs.Repository, error) {
 	builder := sqlbuilder.SQLite.NewSelectBuilder()
 
 	builder.Select("r.id", "r.reference", "r.tag", "r.digest", "r.created_at", "r.updated_at")
@@ -21,7 +21,7 @@ func (db *DB) GetRepositoryByID(id string) (*database.Repository, error) {
 		return nil, row.Err()
 	}
 
-	var model database.RepositoryModel
+	var model structs.RepositoryModel
 	if err := row.Scan(
 		&model.ID,
 		&model.Reference,
@@ -33,5 +33,5 @@ func (db *DB) GetRepositoryByID(id string) (*database.Repository, error) {
 		return nil, err
 	}
 
-	return database.FromModelToRepository(model), nil
+	return structs.FromModelToRepository(model), nil
 }

@@ -6,8 +6,8 @@ import (
 )
 
 type Config struct {
-	Driver string `env:"DRIVER" envDefault:"sqlite3"`
-	DSN    string `env:"DSN" envDefault:"test.db"`
+	Driver string `env:"DATABASE_DRIVER" envDefault:"sqlite3"`
+	DSN    string `env:"DATABASE_DSN" envDefault:"test.db"`
 }
 
 func newConfig() *Config {
