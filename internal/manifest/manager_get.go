@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+//TODO: вынести fs в контроллер поле того как будет универсальный marshaler
 func (m *Manager) Get(project, reference string) (v2_2.Manifest, string, error) {
 	var (
 		manifest  v2_2.Manifest

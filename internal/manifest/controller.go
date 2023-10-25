@@ -81,6 +81,7 @@ func (c *Controller) Create(ctx http.Context) error {
 	}
 
 	//TODO: сделать разбитие reference и парсинг метода
+	//TODO: перевести на fs тк хранение текущего манифеста находится на бд
 	hash, err := c.uploads.UploadManifest(project, methods.SHA256, data)
 	if err != nil {
 		ctx.JSON(http2.StatusBadRequest, errors.NewErrorResponse(errors.CreateManifest))
