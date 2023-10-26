@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"github.com/MigAru/poseidon/internal/config"
@@ -10,10 +11,12 @@ import (
 )
 
 type DB interface {
-	CreateRepository(reference, tag, digest string) error
+	NewTx(ctx context.Context) (*sql.Tx, error)
+	CreateRepository(tx *sql.Tx, reference, tag, digest string) error
 	DeleteRepository(id string) error
 	MarkDeleteRepository(id string) error
-	GetRepository(reference, tag string) (*structs.Repository, error)
+	UpdateDigestRepository(tx *sql.Tx, project, tag, digest string) error
+	GetRepository(tx *sql.Tx, project, tag string) (*structs.Repository, error)
 	GetRepositoryByID(id string) (*structs.Repository, error)
 }
 

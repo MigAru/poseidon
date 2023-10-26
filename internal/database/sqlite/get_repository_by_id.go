@@ -8,7 +8,7 @@ import (
 func (db *DB) GetRepositoryByID(id string) (*structs.Repository, error) {
 	builder := sqlbuilder.SQLite.NewSelectBuilder()
 
-	builder.Select("r.id", "r.reference", "r.tag", "r.digest", "r.created_at", "r.updated_at")
+	builder.Select("r.id", "r.project", "r.tag", "r.digest", "r.created_at", "r.updated_at")
 	builder.From("repository r")
 	builder.JoinWithOption(sqlbuilder.RightJoin, "repository_delete rd", "rd.repository_id=r.id")
 	builder.Where(builder.Equal("id", id), builder.IsNotNull("rb.id"))

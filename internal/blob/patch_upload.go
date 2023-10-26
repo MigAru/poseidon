@@ -61,7 +61,7 @@ func (c *Controller) Upload(ctx http.Context) error {
 		return err
 	}
 
-	uploadURL := "/v2/" + project + "/blobs/uploads/" + uuid
+	uploadURL := "/v2/" + strings.ReplaceAll(project, ".", "/") + "/blobs/uploads/" + uuid
 	//docker client is not support Range
 	headers := http.NewRegisryHeadersParams().WithLocation(uploadURL).WithRange(0, len(buffer)-1).WithUUID(uuid)
 	ctx.SetHeaders(http.CreateRegistryHeaders(headers))

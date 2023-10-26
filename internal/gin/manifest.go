@@ -7,7 +7,7 @@ import (
 
 func (s *Server) registerManifestController(group *gin.RouterGroup, pattern string, controller *manifest.Controller) {
 	group.PUT(pattern, func(ctx *gin.Context) {
-		if err := controller.Create(WrapContext(ctx)); err != nil {
+		if err := controller.Upload(WrapContext(ctx)); err != nil {
 			s.log.Error(err.Error())
 		}
 	})

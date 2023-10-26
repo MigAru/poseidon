@@ -30,7 +30,7 @@ func ValidateProjectNameMiddleware(ctx Context) error {
 
 	}
 
-	if project != "" && subName != "" {
+	if project == "" && subName == "" {
 		return errors.New("name repository not found")
 	}
 

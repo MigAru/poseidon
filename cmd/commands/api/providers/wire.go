@@ -31,7 +31,6 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 		ping.NewPingController,
 		base.NewController,
 		blob.NewController,
-		manifest.NewManager,
 		manifest.NewController,
 		ServerProvider,
 		ServiceProvider,

@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS repository (
     id varchar(256) NOT NULL UNIQUE,
-    reference varchar(512) NOT NULL,
+    project varchar(512) NOT NULL,
     tag varchar(512) NOT NULL,
     digest varchar(2048) NOT NULL ,
     created_at timestamp NOT NULL DEFAULT (datetime('now','localtime')),

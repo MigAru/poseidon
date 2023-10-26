@@ -37,13 +37,12 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 	manager := upload.NewManager(ctx, fs, hasherHasher, logrusLogger)
 	controller := blob.NewController(logrusLogger, configConfig, fs, manager)
 	baseController := base.NewController(logrusLogger)
-	manifestManager := manifest.NewManager(fs)
 	db, cleanup2, err := database.New(configConfig)
 	if err != nil {
 		cleanup()
 		return Backend{}, nil, err
 	}
-	manifestController := manifest.NewController(logrusLogger, manager, manifestManager, db)
+	manifestController := manifest.NewController(logrusLogger, manager, fs, db)
 	server := ServerProvider(configConfig, logrusLogger, pingController, controller, baseController, manifestController)
 	backend, cleanup3, err := ServiceProvider(ctx, server)
 	if err != nil {
