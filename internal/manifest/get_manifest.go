@@ -15,13 +15,17 @@ func (c *Controller) Get(ctx http.Context) error {
 		reference = ctx.Param("reference")
 		manifest  v2_2.Manifest
 	)
-	repository, err := c.db.GetRepository(nil, project, reference)
-	if err != nil {
-		ctx.JSON(http2.StatusNotFound, registryErrors.NewErrorResponse(registryErrors.NameUnknown))
-		return err
+
+	if !c.isDigest(reference) {
+		repository, err := c.db.GetRepository(nil, project, reference)
+		if err != nil {
+			ctx.JSON(http2.StatusNotFound, registryErrors.NewErrorResponse(registryErrors.NameUnknown))
+			return err
+		}
+		reference = repository.Digest
 	}
 
-	fileBytes, err := c.fs.GetDigest(project, repository.Digest)
+	fileBytes, err := c.fs.GetDigest(project, reference)
 	if os.IsNotExist(err) {
 		ctx.JSON(http2.StatusNotFound, registryErrors.NewErrorResponse(registryErrors.NameUnknown))
 		return err
@@ -38,7 +42,7 @@ func (c *Controller) Get(ctx http.Context) error {
 	}
 
 	headers := http.NewRegisryHeadersParams().
-		WithDigest(repository.Digest).
+		WithDigest(reference).
 		WithContentType(manifest.MediaType).
 		WithContentLength(manifest.GetLength())
 

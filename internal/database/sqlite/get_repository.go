@@ -14,6 +14,7 @@ func (db *DB) GetRepository(tx *sql.Tx, project, tag string) (*structs.Repositor
 			return nil, err
 		}
 		tx = defaultTx
+		defer tx.Commit()
 	}
 
 	builder := sqlbuilder.SQLite.NewSelectBuilder()
