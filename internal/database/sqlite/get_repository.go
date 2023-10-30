@@ -1,22 +1,12 @@
 package sqlite
 
 import (
-	"context"
 	"database/sql"
 	"github.com/MigAru/poseidon/internal/database/structs"
 	"github.com/huandu/go-sqlbuilder"
 )
 
 func (db *DB) GetRepository(tx *sql.Tx, project, tag string) (*structs.Repository, error) {
-	if tx == nil {
-		defaultTx, err := db.conn.BeginTx(context.Background(), nil)
-		if err != nil {
-			return nil, err
-		}
-		tx = defaultTx
-		defer tx.Commit()
-	}
-
 	builder := sqlbuilder.SQLite.NewSelectBuilder()
 
 	builder.Select("r.id", "r.project", "r.tag", "r.digest", "r.created_at", "r.updated_at")

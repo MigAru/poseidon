@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/MigAru/poseidon/pkg/http"
 	registryErrors "github.com/MigAru/poseidon/pkg/registry/errors"
@@ -17,12 +18,22 @@ func (c *Controller) Get(ctx http.Context) error {
 	)
 
 	if !c.isDigest(reference) {
-		repository, err := c.db.GetRepository(nil, project, reference)
+		tx, err := c.db.NewTx(context.Background())
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback()
+
+		repository, err := c.db.GetRepository(tx, project, reference)
 		if err != nil {
 			ctx.JSON(http2.StatusNotFound, registryErrors.NewErrorResponse(registryErrors.NameUnknown))
 			return err
 		}
 		reference = repository.Digest
+
+		if err := tx.Commit(); err != nil {
+			return err
+		}
 	}
 
 	fileBytes, err := c.fs.GetDigest(project, reference)

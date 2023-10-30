@@ -14,7 +14,7 @@ type DB interface {
 	NewTx(ctx context.Context) (*sql.Tx, error)
 	CreateRepository(tx *sql.Tx, reference, tag, digest string) error
 	DeleteRepository(id string) error
-	MarkDeleteRepository(id string) error
+	MarkDeleteRepository(tx *sql.Tx, id string) error
 	UpdateDigestRepository(tx *sql.Tx, project, tag, digest string) error
 	GetRepository(tx *sql.Tx, project, tag string) (*structs.Repository, error)
 	GetRepositoryByID(id string) (*structs.Repository, error)
