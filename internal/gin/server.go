@@ -35,7 +35,7 @@ func NewServer(
 	server := &Server{
 		log:                   log,
 		mainController:        gin.Default(),
-		shutdownTimeoutSecond: time.Duration(cfg.Server.TimeoutGracefullShutdown) * time.Second,
+		shutdownTimeoutSecond: time.Duration(cfg.Server.TimeoutGracefulShutdown) * time.Second,
 		port:                  cfg.Server.Port,
 	}
 

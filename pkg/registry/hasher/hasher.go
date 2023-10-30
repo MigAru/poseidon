@@ -9,8 +9,7 @@ import (
 	"hash"
 )
 
-type Hasher struct {
-}
+type Hasher struct{}
 
 func New() *Hasher {
 	return &Hasher{}

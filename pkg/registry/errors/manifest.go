@@ -19,10 +19,10 @@ var (
 	ManifestInvalid = DockerError{
 		Code:    "MANIFEST_INVALID",
 		Message: "manifest invalid",
-		Detail: "During upload, manifests undergo several checks ensuring validity. " +
-			"If those checks fail, this error may be returned, " +
-			"unless a more specific error is included. " +
-			"The detail will contain information the failed validation.",
+		Detail: `During upload, manifests undergo several checks ensuring validity.
+			If those checks fail, this error may be returned,
+			unless a more specific error is included.
+			The detail will contain information the failed validation.`,
 	}
 	ManifestUnverified = DockerError{
 		Code:    "MANIFEST_UNVERIFIED",

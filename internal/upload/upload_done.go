@@ -19,7 +19,5 @@ func (u *Upload) Done(digest string, finalChunk []byte) (int, error) {
 		return 0, err
 	}
 
-	defer u.cancel()
-
 	return len(blobBytes), nil
 }
