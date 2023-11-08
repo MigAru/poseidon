@@ -36,7 +36,7 @@ func (c *Controller) Get(ctx http.Context) error {
 		}
 	}
 
-	fileBytes, err := c.fs.GetDigest(project, reference)
+	fileBytes, err := c.fs.GetDigest(reference)
 	if os.IsNotExist(err) {
 		ctx.JSON(http2.StatusNotFound, registryErrors.NewErrorResponse(registryErrors.NameUnknown))
 		return err

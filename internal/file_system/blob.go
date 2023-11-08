@@ -47,7 +47,6 @@ func (f *FS) CheckExistBlob(name string) bool {
 	return true
 }
 
-func (f *FS) DeleteBlob(_ string) error {
-	//TODO: реализовать после менеджера загрузок
-	panic("implement me")
+func (f *FS) DeleteBlob(digest string) error {
+	return os.Remove(f.normalizePath(digest))
 }

@@ -3,7 +3,6 @@ package blob
 import (
 	"github.com/MigAru/poseidon/pkg/http"
 	httpInterface "net/http"
-	"strconv"
 	"strings"
 )
 
@@ -11,12 +10,7 @@ func (c *Controller) CreateUpload(ctx http.Context) error {
 	// создание загрузки
 	project := http.GetProjectName(ctx)
 
-	totalSize, err := strconv.Atoi(ctx.Header("Content-Length"))
-	if err != nil {
-		ctx.NoContent(httpInterface.StatusBadRequest)
-		return err
-	}
-	id, err := c.manager.Create(project, totalSize)
+	id, err := c.uploads.Create()
 	if err != nil {
 		ctx.NoContent(httpInterface.StatusBadRequest)
 		return err

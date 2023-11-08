@@ -7,7 +7,7 @@ import (
 )
 
 func (c *Controller) DeleteUpload(ctx http.Context) error {
-	if err := c.manager.DeleteUpload(ctx.Param("uuid")); err != nil {
+	if err := c.uploads.Delete(ctx.Param("uuid")); err != nil {
 		ctx.JSON(httpInterface.StatusNotFound, errors.NewErrorResponse(errors.BlobUploadUnknown))
 		return err
 	}

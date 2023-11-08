@@ -27,7 +27,7 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 		database.New,
 		file_system.New,
 		hasher.New,
-		upload.NewManager,
+		upload.NewUploads,
 		ping.NewPingController,
 		base.NewController,
 		blob.NewController,

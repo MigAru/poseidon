@@ -14,13 +14,13 @@ type Controller struct {
 	fs      *file_system.FS
 	hr      hasher.Hasher
 	db      database.DB
-	uploads *upload.Manager
+	uploads *upload.Uploads
 }
 
 //TODO: сделать обработку ошибок
 //TODO: разнести функции
 
-func NewController(log *logrus.Logger, uploads *upload.Manager, fs *file_system.FS, db database.DB) *Controller {
+func NewController(log *logrus.Logger, uploads *upload.Uploads, fs *file_system.FS, db database.DB) *Controller {
 	return &Controller{
 		log:     log,
 		fs:      fs,

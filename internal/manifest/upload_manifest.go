@@ -41,7 +41,7 @@ func (c *Controller) Upload(ctx http.Context) error {
 	}
 	hash := fmt.Sprintf("%s:%x", methods.SHA256, hasher.Sum(nil))
 
-	if err := c.fs.CreateDigest(project, hash, data); err != nil {
+	if err := c.fs.CreateDigest(hash, data); err != nil {
 		ctx.JSON(http2.StatusBadRequest, registryErrors.NewErrorResponse(registryErrors.CreateManifest))
 		return err
 	}

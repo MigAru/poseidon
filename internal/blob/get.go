@@ -8,10 +8,9 @@ import (
 
 func (c *Controller) Get(ctx http.Context) error {
 	//TODO: сделать кэш отдачи слоев в памяти(middleware)
-	project := http.GetProjectName(ctx)
 	digest := ctx.Param("digest")
 
-	data, err := c.fs.GetDigest(project, digest)
+	data, err := c.fs.GetDigest(digest)
 	if err != nil {
 		ctx.JSON(404, errors.NewErrorResponse(errors.BlobUnknown))
 		return err

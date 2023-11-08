@@ -3,7 +3,7 @@ package blob
 import (
 	"github.com/MigAru/poseidon/pkg/http"
 	"github.com/MigAru/poseidon/pkg/registry/errors"
-	"io/ioutil"
+	"io"
 	httpInterface "net/http"
 )
 
@@ -14,18 +14,17 @@ func (c *Controller) PutUpload(ctx http.Context) error {
 		digest  = ctx.QueryParam("digest")
 	)
 
-	blob, ok := c.manager.Get(uuid)
-	if !ok {
+	if _, err := c.uploads.Get(uuid); err != nil {
 		ctx.JSON(httpInterface.StatusBadRequest, errors.NewErrorResponse(errors.BlobUploadUnknown))
-		return nil
+		return err
 	}
 
-	buffer, err := ioutil.ReadAll(ctx.Body())
+	buffer, err := io.ReadAll(ctx.Body())
 	if err != nil {
 		ctx.NoContent(httpInterface.StatusBadRequest)
 		return err
 	}
-	written, err := blob.Done(digest, buffer)
+	written, err := c.uploads.Done(uuid, digest, buffer)
 	if err != nil {
 		ctx.JSON(httpInterface.StatusBadRequest, errors.NewErrorResponse(errors.DigestInvalid))
 		return err

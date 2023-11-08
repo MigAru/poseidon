@@ -2,20 +2,19 @@ package upload
 
 import (
 	"github.com/MigAru/poseidon/internal/file_system"
+	"github.com/MigAru/poseidon/pkg/registry/hasher"
 	"github.com/sirupsen/logrus"
-	"sync"
 )
 
 type Uploads struct {
-	mu     sync.RWMutex
 	fs     *file_system.FS
 	log    *logrus.Logger
-	unsafe map[string]*Upload
+	hasher *hasher.Hasher
 }
 
-func NewUploads(fs *file_system.FS, log *logrus.Logger) *Uploads {
+func NewUploads(fs *file_system.FS, log *logrus.Logger, hasher *hasher.Hasher) *Uploads {
 	return &Uploads{
-		unsafe: make(map[string]*Upload),
+		hasher: hasher,
 		fs:     fs,
 		log:    log,
 	}

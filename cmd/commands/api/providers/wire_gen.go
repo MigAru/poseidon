@@ -34,15 +34,15 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 	pingController := ping.NewPingController()
 	fs := file_system.New(configConfig)
 	hasherHasher := hasher.New()
-	manager := upload.NewManager(ctx, fs, hasherHasher, logrusLogger)
-	controller := blob.NewController(logrusLogger, configConfig, fs, manager)
+	uploads := upload.NewUploads(fs, logrusLogger, hasherHasher)
+	controller := blob.NewController(logrusLogger, fs, uploads)
 	baseController := base.NewController(logrusLogger)
 	db, cleanup2, err := database.New(configConfig)
 	if err != nil {
 		cleanup()
 		return Backend{}, nil, err
 	}
-	manifestController := manifest.NewController(logrusLogger, manager, fs, db)
+	manifestController := manifest.NewController(logrusLogger, uploads, fs, db)
 	server := ServerProvider(configConfig, logrusLogger, pingController, controller, baseController, manifestController)
 	backend, cleanup3, err := ServiceProvider(ctx, server)
 	if err != nil {

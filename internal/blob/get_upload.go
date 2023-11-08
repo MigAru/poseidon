@@ -9,13 +9,13 @@ import (
 func (c *Controller) GetUpload(ctx http.Context) error {
 	var uuid = ctx.Param("uuid")
 
-	blob, ok := c.manager.Get(uuid)
-	if !ok {
+	blobRaw, err := c.uploads.Get(uuid)
+	if err != nil {
 		ctx.JSON(httpInterface.StatusBadRequest, errors.NewErrorResponse(errors.BlobUploadUnknown))
 		return nil
 	}
 
-	uploaded := blob.UploadedBytes
+	uploaded := len(blobRaw)
 	if uploaded > 0 {
 		uploaded -= 1
 	}
