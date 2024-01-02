@@ -1,13 +1,14 @@
 package manifest
 
 import (
-	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/MigAru/poseidon/pkg/http"
 	registryErrors "github.com/MigAru/poseidon/pkg/registry/errors"
 	"github.com/MigAru/poseidon/pkg/registry/hasher/methods"
+	v2_2 "github.com/MigAru/poseidon/pkg/registry/manifest/schema/v2.2"
 	"io"
 	http2 "net/http"
 	"strings"
@@ -25,7 +26,14 @@ func (c *Controller) Upload(ctx http.Context) error {
 		return err
 	}
 
-	tx, err := c.db.NewTx(context.Background())
+	var manifest v2_2.Manifest
+
+	if err := json.Unmarshal(data, manifest); err != nil {
+		ctx.JSON(http2.StatusInternalServerError, registryErrors.NewErrorResponse(registryErrors.ManifestInvalid))
+		return err
+	}
+
+	tx, err := c.db.NewTx(ctx.Request().Context())
 	if err != nil {
 		ctx.NoContent(http2.StatusInternalServerError)
 		return err
@@ -46,7 +54,7 @@ func (c *Controller) Upload(ctx http.Context) error {
 		return err
 	}
 
-	if err := c.createOrUpdateRepository(tx, project, reference, hash); err != nil {
+	if err := c.createOrUpdateRepository(tx, project, reference, hash, manifest.GetLayersNames()); err != nil {
 		ctx.NoContent(http2.StatusInternalServerError)
 		return err
 	}
@@ -64,7 +72,7 @@ func (c *Controller) Upload(ctx http.Context) error {
 	return nil
 }
 
-func (c *Controller) createOrUpdateRepository(tx *sql.Tx, project, tag, digest string) error {
+func (c *Controller) createOrUpdateRepository(tx *sql.Tx, project, tag, digest string, layers []string) error {
 	_, err := c.db.GetRepository(tx, project, tag)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err

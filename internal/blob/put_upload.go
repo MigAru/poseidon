@@ -19,14 +19,26 @@ func (c *Controller) PutUpload(ctx http.Context) error {
 		return err
 	}
 
+	tx, err := c.db.NewTx(ctx.Request().Context())
+	if err != nil {
+		ctx.NoContent(httpInterface.StatusInternalServerError)
+		return err
+	}
+	defer tx.Rollback()
+
 	buffer, err := io.ReadAll(ctx.Body())
 	if err != nil {
 		ctx.NoContent(httpInterface.StatusBadRequest)
 		return err
 	}
+
 	written, err := c.uploads.Done(uuid, digest, buffer)
 	if err != nil {
 		ctx.JSON(httpInterface.StatusBadRequest, errors.NewErrorResponse(errors.DigestInvalid))
+		return err
+	}
+	if err := c.db.IndexingDigest(tx, digest); err != nil {
+		ctx.NoContent(httpInterface.StatusBadRequest)
 		return err
 	}
 
@@ -35,5 +47,5 @@ func (c *Controller) PutUpload(ctx http.Context) error {
 	headers := http.NewRegisryHeadersParams().WithLocation(uploadURL).WithRange(0, written).WithUUID(uuid)
 	ctx.SetHeaders(http.CreateRegistryHeaders(headers))
 	ctx.NoContent(201)
-	return nil
+	return tx.Commit()
 }

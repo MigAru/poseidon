@@ -9,6 +9,15 @@ type Manifest struct {
 	Layers        []Layer        `json:"layers"`
 }
 
+func (m *Manifest) GetLayersNames() []string {
+	var layers []string
+	for _, layer := range m.Layers {
+		layers = append(layers, layer.Digest)
+	}
+
+	return layers
+}
+
 func (m *Manifest) GetLength() int {
 	b, _ := json.Marshal(m)
 	return len(b)
