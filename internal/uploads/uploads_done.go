@@ -1,4 +1,4 @@
-package upload
+package uploads
 
 func (u *Uploads) Done(id string, digest string, chunk []byte) (int, error) {
 	blobBytes, err := u.fs.GetBlob(id)

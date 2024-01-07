@@ -7,17 +7,17 @@ var (
 		Detail: "This error may be returned when a blob is unknown " +
 			"to the registry in a specified repository. " +
 			"This can be returned with a standard get or " +
-			"if a manifest references an unknown layer during upload",
+			"if a manifest references an unknown layer during uploads",
 	}
 	BlobUploadInvalid = DockerError{
 		Code:    "BLOB_UPLOAD_INVALID",
-		Message: "blob upload invalid",
-		Detail:  "The blob upload encountered an error and can no longer proceed.",
+		Message: "blob uploads invalid",
+		Detail:  "The blob uploads encountered an error and can no longer proceed.",
 	}
 	BlobUploadUnknown = DockerError{
 		Code:    "BLOB_UPLOAD_UNKNOWN",
-		Message: "blob upload unknown to registry",
-		Detail:  "If a blob upload has been cancelled or was never started, this error code may be returned.",
+		Message: "blob uploads unknown to registry",
+		Detail:  "If a blob uploads has been cancelled or was never started, this error code may be returned.",
 	}
 	DigestInvalid = DockerError{
 		Code:    "DIGEST_INVALID",

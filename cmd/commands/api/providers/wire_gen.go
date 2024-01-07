@@ -13,10 +13,12 @@ import (
 	"github.com/MigAru/poseidon/internal/config"
 	"github.com/MigAru/poseidon/internal/database"
 	"github.com/MigAru/poseidon/internal/file_system"
+	"github.com/MigAru/poseidon/internal/gin"
 	"github.com/MigAru/poseidon/internal/logger"
 	"github.com/MigAru/poseidon/internal/manifest"
 	"github.com/MigAru/poseidon/internal/ping"
-	"github.com/MigAru/poseidon/internal/upload"
+	"github.com/MigAru/poseidon/internal/tech"
+	"github.com/MigAru/poseidon/internal/uploads"
 	"github.com/MigAru/poseidon/pkg/registry/hasher"
 )
 
@@ -31,19 +33,20 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 	if err != nil {
 		return Backend{}, nil, err
 	}
-	pingController := ping.NewPingController()
+	pingController := ping.NewController()
 	fs := file_system.New(configConfig)
 	hasherHasher := hasher.New()
-	uploads := upload.NewUploads(fs, logrusLogger, hasherHasher)
-	controller := blob.NewController(logrusLogger, fs, uploads)
-	baseController := base.NewController(logrusLogger)
+	uploadsUploads := uploads.NewUploads(fs, logrusLogger, hasherHasher)
 	db, cleanup2, err := database.New(configConfig)
 	if err != nil {
 		cleanup()
 		return Backend{}, nil, err
 	}
-	manifestController := manifest.NewController(logrusLogger, uploads, fs, db)
-	server := ServerProvider(configConfig, logrusLogger, pingController, controller, baseController, manifestController)
+	controller := blob.NewController(logrusLogger, fs, uploadsUploads, db)
+	baseController := base.NewController(logrusLogger)
+	manifestController := manifest.NewController(logrusLogger, uploadsUploads, fs, db)
+	tagsController := tech.NewController(logrusLogger, db)
+	server := gin.NewServer(configConfig, logrusLogger, pingController, controller, baseController, manifestController, tagsController)
 	backend, cleanup3, err := ServiceProvider(ctx, server)
 	if err != nil {
 		cleanup2()

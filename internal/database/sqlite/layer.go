@@ -26,7 +26,7 @@ func (db *DB) RemoveIndexesLayers(tx *sql.Tx, repositoryID string) error {
 	return nil
 }
 
-func (db *DB) IndexingLayers(tx *sql.Tx, repositoryID string, layers []string) error {
+func (db *DB) IndexingLayers(tx *sql.Tx, repositoryID string, layers []int) error {
 	if tx == nil {
 		defaultTx, err := db.conn.BeginTx(context.Background(), nil)
 		if err != nil {
@@ -36,7 +36,7 @@ func (db *DB) IndexingLayers(tx *sql.Tx, repositoryID string, layers []string) e
 	}
 
 	builder := sqlbuilder.SQLite.NewInsertBuilder()
-	builder.InsertInto("repository_layers").Cols("repository_id", "layer")
+	builder.InsertInto("repository_layers").Cols("repository_id", "digest_id")
 
 	for _, layer := range layers {
 		builder.Values(repositoryID, layer)

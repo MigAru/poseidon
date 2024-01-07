@@ -7,7 +7,7 @@ import (
 type PingController struct {
 }
 
-func NewPingController() *PingController {
+func NewController() *PingController {
 	return &PingController{}
 }
 

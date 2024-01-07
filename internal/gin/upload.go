@@ -8,14 +8,14 @@ import (
 func (s *Server) registerUploadController(group *gin.RouterGroup, pattern string, controller *blob.Controller) {
 	uploadPattern := pattern + ":uuid"
 
-	// init upload
+	// init uploads
 	group.POST(pattern, func(ctx *gin.Context) {
 		if err := controller.CreateUpload(WrapContext(ctx)); err != nil {
 			s.log.Error(err.Error())
 		}
 	})
 
-	//getting info upload
+	//getting info uploads
 	group.GET(uploadPattern, func(ctx *gin.Context) {
 		if err := controller.GetUpload(WrapContext(ctx)); err != nil {
 			s.log.Error(err.Error())

@@ -3,7 +3,7 @@ package blob
 import (
 	"github.com/MigAru/poseidon/internal/database"
 	"github.com/MigAru/poseidon/internal/file_system"
-	"github.com/MigAru/poseidon/internal/upload"
+	"github.com/MigAru/poseidon/internal/uploads"
 	"github.com/sirupsen/logrus"
 	httpInterface "net/http"
 )
@@ -11,12 +11,12 @@ import (
 type Controller struct {
 	log     *logrus.Logger
 	fs      *file_system.FS
-	uploads *upload.Uploads
+	uploads *uploads.Uploads
 	db      database.DB
 }
 
-func NewController(log *logrus.Logger, fs *file_system.FS, uploads *upload.Uploads) *Controller {
-	return &Controller{log: log, fs: fs, uploads: uploads}
+func NewController(log *logrus.Logger, fs *file_system.FS, uploads *uploads.Uploads, db database.DB) *Controller {
+	return &Controller{log: log, fs: fs, uploads: uploads, db: db}
 }
 
 func (c *Controller) buildStatusUpload(uploadedSize, totalSize int) int {

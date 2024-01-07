@@ -9,11 +9,13 @@ type Manifest struct {
 	Layers        []Layer        `json:"layers"`
 }
 
-func (m *Manifest) GetLayersNames() []string {
+func (m *Manifest) GetLayersDigests() []string {
 	var layers []string
 	for _, layer := range m.Layers {
 		layers = append(layers, layer.Digest)
 	}
+
+	layers = append(layers, m.Config.Digest)
 
 	return layers
 }

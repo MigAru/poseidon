@@ -43,14 +43,18 @@ func (gc *GC) clear(ctx http.Context) {
 		gc.log.Error(err)
 	}
 
+	if err := gc.clearDigests(); err != nil {
+		gc.log.Error(err)
+	}
+
 	if err := gc.clearRepositories(); err != nil {
 		gc.log.Error(err)
 	}
 
 	if full {
-		gc.digestsClear()
+		gc.digestFsClear()
 	}
 }
 
-func (gc *GC) digestsClear() {
+func (gc *GC) digestFsClear() {
 }

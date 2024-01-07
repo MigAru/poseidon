@@ -42,6 +42,29 @@ func (db *DB) GetRepository(tx *sql.Tx, reference, tag string) (*structs.Reposit
 	return structs.FromModelToRepository(model), nil
 }
 
+func (db *DB) GetRepositories() ([]string, error) {
+	builder := sqlbuilder.SQLite.NewSelectBuilder()
+	builder.Select("reference").From("repository")
+	builder.Where(builder.Equal("marked", false)).Distinct()
+
+	sqlRaw, args := builder.Build()
+
+	rows, err := db.conn.Query(sqlRaw, args...)
+	if err != nil {
+		return nil, err
+	}
+	var repositories []string
+	for rows.Next() {
+		var model sql.NullString
+		if err := rows.Scan(&model); err != nil {
+			return nil, err
+		}
+
+		repositories = append(repositories, model.String)
+	}
+	return repositories, nil
+}
+
 func (db *DB) GetRepositoryByID(id string) (*structs.Repository, error) {
 	builder := sqlbuilder.SQLite.NewSelectBuilder()
 
@@ -72,16 +95,42 @@ func (db *DB) GetRepositoryByID(id string) (*structs.Repository, error) {
 	return structs.FromModelToRepository(model), nil
 }
 
-func (db *DB) CreateRepository(tx *sql.Tx, project, tag, digest string) error {
+func (db *DB) GetTags(reference string) ([]string, error) {
+	builder := sqlbuilder.SQLite.NewSelectBuilder()
+	builder.Select("tag").From("repository")
+	builder.Where(
+		builder.Equal("reference", reference),
+		builder.Equal("marked", false),
+	)
+
+	sqlRaw, args := builder.Build()
+	rows, err := db.conn.Query(sqlRaw, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	var tags []string
+	for rows.Next() {
+		var model sql.NullString
+		if err := rows.Scan(&model); err != nil {
+			return nil, err
+		}
+		tags = append(tags, model.String)
+	}
+
+	return tags, nil
+}
+
+func (db *DB) CreateRepository(tx *sql.Tx, project, tag, digest string) (string, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
-		return err
+		return id.String(), err
 	}
 	if tx == nil {
 		defaultTx, err := db.conn.BeginTx(context.Background(), nil)
 
 		if err != nil {
-			return err
+			return id.String(), err
 		}
 		tx = defaultTx
 	}
@@ -93,10 +142,10 @@ func (db *DB) CreateRepository(tx *sql.Tx, project, tag, digest string) error {
 	sqlRaw, args := builder.Build()
 
 	if _, err := tx.Exec(sqlRaw, args...); err != nil {
-		return err
+		return id.String(), err
 	}
 
-	return nil
+	return id.String(), nil
 }
 
 func (db *DB) DeleteRepository(id string) error {
@@ -143,7 +192,7 @@ func (db *DB) GetRepositoriesForDelete() ([]*structs.Repository, error) {
 	return res, nil
 }
 
-func (db *DB) DigestUseAnotherRepository() (bool, error) {
+func (db *DB) DigestUseAnotherRepository(_ string) (bool, error) {
 	return false, nil
 }
 

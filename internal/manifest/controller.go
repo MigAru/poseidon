@@ -3,7 +3,7 @@ package manifest
 import (
 	"github.com/MigAru/poseidon/internal/database"
 	"github.com/MigAru/poseidon/internal/file_system"
-	"github.com/MigAru/poseidon/internal/upload"
+	"github.com/MigAru/poseidon/internal/uploads"
 	"github.com/MigAru/poseidon/pkg/registry/hasher"
 	"github.com/sirupsen/logrus"
 	"strings"
@@ -14,13 +14,13 @@ type Controller struct {
 	fs      *file_system.FS
 	hr      hasher.Hasher
 	db      database.DB
-	uploads *upload.Uploads
+	uploads *uploads.Uploads
 }
 
 //TODO: сделать обработку ошибок
 //TODO: разнести функции
 
-func NewController(log *logrus.Logger, uploads *upload.Uploads, fs *file_system.FS, db database.DB) *Controller {
+func NewController(log *logrus.Logger, uploads *uploads.Uploads, fs *file_system.FS, db database.DB) *Controller {
 	return &Controller{
 		log:     log,
 		fs:      fs,

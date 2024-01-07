@@ -1,4 +1,4 @@
-package upload
+package uploads
 
 func (u *Uploads) Delete(id string) error {
 	if _, err := u.fs.GetBlob(id); err != nil {

@@ -1,4 +1,4 @@
-package upload
+package uploads
 
 func (u *Uploads) Update(params *UpdateParams) error {
 	if _, err := u.fs.GetBlob(params.ID); err != nil {

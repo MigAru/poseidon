@@ -7,6 +7,7 @@ import (
 	"github.com/MigAru/poseidon/internal/config"
 	"github.com/MigAru/poseidon/internal/manifest"
 	"github.com/MigAru/poseidon/internal/ping"
+	"github.com/MigAru/poseidon/internal/tech"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -22,7 +23,7 @@ type Server struct {
 	server *http.Server
 }
 
-//TODO: вынести отдельный контроллер на upload
+//TODO: вынести отдельный контроллер на uploads
 
 func NewServer(
 	cfg *config.Config,
@@ -31,6 +32,7 @@ func NewServer(
 	blobController *blob.Controller,
 	baseController *base.Controller,
 	manifestController *manifest.Controller,
+	tagsController *tech.Controller,
 ) *Server {
 	server := &Server{
 		log:                   log,
@@ -39,7 +41,13 @@ func NewServer(
 		port:                  cfg.Server.Port,
 	}
 
-	server.registerControllers(pingController, blobController, baseController, manifestController)
+	server.registerControllers(
+		pingController,
+		blobController,
+		baseController,
+		manifestController,
+		tagsController,
+	)
 
 	return server
 }
@@ -48,6 +56,7 @@ func (s *Server) registerControllers(
 	blobController *blob.Controller,
 	baseController *base.Controller,
 	manifestController *manifest.Controller,
+	techController *tech.Controller,
 ) {
 	s.registerPingController(ping)
 
@@ -59,6 +68,10 @@ func (s *Server) registerControllers(
 		}
 	})
 
+	APIv2Group.GET("/_catalog", func(ctx *gin.Context) {
+		techController.CatalogRepositories(WrapContext(ctx))
+	})
+
 	APIv2Group.Use(s.validateProjectNameMiddleware)
 	s.registerManifestController(APIv2Group, ":project/manifests/:reference", manifestController)
 	s.registerManifestController(APIv2Group, ":project/:project-sub-name/manifests/:reference", manifestController)
@@ -68,6 +81,13 @@ func (s *Server) registerControllers(
 
 	s.registerUploadController(APIv2Group, ":project/blobs/uploads/", blobController)
 	s.registerUploadController(APIv2Group, ":project/:project-sub-name/blobs/uploads/", blobController)
+
+	APIv2Group.GET(":project/tags/list", func(ctx *gin.Context) {
+		techController.ListTags(WrapContext(ctx))
+	})
+	APIv2Group.GET(":project/:project-sub-name/tags/list", func(ctx *gin.Context) {
+		techController.ListTags(WrapContext(ctx))
+	})
 }
 
 func (s *Server) registerPingController(controller *ping.PingController) {

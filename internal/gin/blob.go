@@ -16,4 +16,7 @@ func (s *Server) registerBlobController(group *gin.RouterGroup, pattern string, 
 			s.log.Error(err.Error())
 		}
 	})
+	group.DELETE(pattern, func(ctx *gin.Context) {
+		controller.Delete(WrapContext(ctx))
+	})
 }

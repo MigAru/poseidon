@@ -1,7 +1,7 @@
 package blob
 
 import (
-	"github.com/MigAru/poseidon/internal/upload"
+	"github.com/MigAru/poseidon/internal/uploads"
 	"github.com/MigAru/poseidon/pkg/http"
 	"github.com/MigAru/poseidon/pkg/registry/errors"
 	"io"
@@ -10,7 +10,7 @@ import (
 )
 
 func (c *Controller) Upload(ctx http.Context) error {
-	//TODO: разнести upload на patch и put
+	//TODO: разнести uploads на patch и put
 	var (
 		project = http.GetProjectName(ctx)
 		uuid    = ctx.Param("uuid")
@@ -26,9 +26,24 @@ func (c *Controller) Upload(ctx http.Context) error {
 	defer ctx.Body().Close()
 	if ctx.QueryParam("digest") != "" && ctx.Header("Content-Length") == "0" {
 		//для того чтобы создать постоянный слой в памяти
-
 		buffer, err := io.ReadAll(ctx.Body())
 		if err != nil {
+			ctx.NoContent(httpInterface.StatusBadRequest)
+			return err
+		}
+		tx, err := c.db.NewTx(ctx.Request().Context())
+		if err != nil {
+			ctx.NoContent(httpInterface.StatusBadRequest)
+			return err
+		}
+		defer tx.Rollback()
+
+		if err := c.db.UnmarkDeleteDigest(tx, digest); err != nil {
+			ctx.NoContent(httpInterface.StatusInternalServerError)
+			return err
+		}
+
+		if err := c.db.IndexingDigest(tx, digest); err != nil {
 			ctx.NoContent(httpInterface.StatusBadRequest)
 			return err
 		}
@@ -39,12 +54,12 @@ func (c *Controller) Upload(ctx http.Context) error {
 			return err
 		}
 
-		uploadURL := "/v2/" + strings.ReplaceAll(project, ".", "/") + "/blobs/upload/" + uuid
+		uploadURL := "/v2/" + strings.ReplaceAll(project, ".", "/") + "/blobs/uploads/" + uuid
 
 		headers := http.NewRegisryHeadersParams().WithLocation(uploadURL).WithRange(0, written).WithUUID(uuid)
 		ctx.SetHeaders(http.CreateRegistryHeaders(headers))
 		ctx.NoContent(201)
-		return nil
+		return tx.Commit()
 	}
 
 	buffer, err := io.ReadAll(ctx.Body())
@@ -54,7 +69,7 @@ func (c *Controller) Upload(ctx http.Context) error {
 		return err
 	}
 
-	params := upload.NewUpdateParams(uuid).WithChunk(buffer)
+	params := uploads.NewUpdateParams(uuid).WithChunk(buffer)
 	if err := c.uploads.Update(params); err != nil {
 		ctx.JSON(httpInterface.StatusBadRequest, errors.NewErrorResponse(errors.RangeInvalid))
 		return err

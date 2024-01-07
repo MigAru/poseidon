@@ -25,7 +25,7 @@ var (
 	TagInvalid = DockerError{
 		Code:    "TAG_INVALID",
 		Message: "manifest tag did not match URI",
-		Detail: "During a manifest upload, if the tag in the manifest does not match " +
+		Detail: "During a manifest uploads, if the tag in the manifest does not match " +
 			"the uri tag, this error will be returned.",
 	}
 	Unauthorized = DockerError{

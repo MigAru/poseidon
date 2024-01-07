@@ -12,20 +12,27 @@ import (
 
 type DB interface {
 	NewTx(ctx context.Context) (*sql.Tx, error)
-	CreateRepository(tx *sql.Tx, reference, tag, digest string) error
 
+	IndexingLayers(tx *sql.Tx, repositoryID string, layers []int) error
 	RemoveIndexesLayers(tx *sql.Tx, repositoryID string) error
-	IndexingDigest(tx *sql.Tx, digest string) error
-	UpdateDigestRepository(tx *sql.Tx, project, tag, digest string) error
+
 	GetDigestsForDelete() ([]string, error)
-	MarkDeleteDigest(digest string) error
+	GetDigestID(digest string) (int, error)
+	IndexingDigest(tx *sql.Tx, digest string) error
+	MarkDeleteDigest(tx *sql.Tx, digest string) error
+	UnmarkDeleteDigest(tx *sql.Tx, digest string) error
+
+	GetTags(reference string) ([]string, error)
 
 	GetRepository(tx *sql.Tx, project, tag string) (*structs.Repository, error)
+	GetRepositories() ([]string, error)
 	GetRepositoriesForDelete() ([]*structs.Repository, error)
 	GetRepositoryByID(id string) (*structs.Repository, error)
+	UpdateDigestRepository(tx *sql.Tx, project, tag, digest string) error
+	CreateRepository(tx *sql.Tx, reference, tag, digest string) (string, error)
 	MarkDeleteRepository(tx *sql.Tx, id string) error
 	DeleteRepository(id string) error
-	DigestUseAnotherRepository() (bool, error)
+	DigestUseAnotherRepository(digest string) (bool, error)
 }
 
 func New(cfg *config.Config) (DB, func(), error) {

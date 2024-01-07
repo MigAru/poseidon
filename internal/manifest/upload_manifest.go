@@ -28,7 +28,7 @@ func (c *Controller) Upload(ctx http.Context) error {
 
 	var manifest v2_2.Manifest
 
-	if err := json.Unmarshal(data, manifest); err != nil {
+	if err := json.Unmarshal(data, &manifest); err != nil {
 		ctx.JSON(http2.StatusInternalServerError, registryErrors.NewErrorResponse(registryErrors.ManifestInvalid))
 		return err
 	}
@@ -54,7 +54,7 @@ func (c *Controller) Upload(ctx http.Context) error {
 		return err
 	}
 
-	if err := c.createOrUpdateRepository(tx, project, reference, hash, manifest.GetLayersNames()); err != nil {
+	if err := c.createOrUpdateRepository(tx, project, reference, hash, manifest.GetLayersDigests()); err != nil {
 		ctx.NoContent(http2.StatusInternalServerError)
 		return err
 	}
@@ -73,15 +73,42 @@ func (c *Controller) Upload(ctx http.Context) error {
 }
 
 func (c *Controller) createOrUpdateRepository(tx *sql.Tx, project, tag, digest string, layers []string) error {
-	_, err := c.db.GetRepository(tx, project, tag)
+	var (
+		repositoryID string
+		layersIDs    []int
+	)
+
+	repository, err := c.db.GetRepository(tx, project, tag)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
 
+	if err == nil {
+		repositoryID = repository.ID
+	}
+
 	if errors.Is(err, sql.ErrNoRows) {
-		if err := c.db.CreateRepository(tx, project, tag, digest); err != nil {
+		repositoryID, err = c.db.CreateRepository(tx, project, tag, digest)
+		if err != nil {
 			return err
 		}
+	}
+
+	if err := c.db.RemoveIndexesLayers(tx, repositoryID); err != nil {
+		return err
+	}
+
+	for _, layer := range layers {
+		id, err := c.db.GetDigestID(layer)
+		if err != nil {
+			return err
+		}
+
+		layersIDs = append(layersIDs, id)
+	}
+
+	if err := c.db.IndexingLayers(tx, repositoryID, layersIDs); err != nil {
+		return err
 	}
 
 	if err := c.db.UpdateDigestRepository(tx, project, tag, digest); err != nil {

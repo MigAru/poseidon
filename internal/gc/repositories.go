@@ -23,13 +23,13 @@ func (gc *GC) clearRepositories() error {
 }
 
 func (gc *GC) clearRepository(repository *structs.Repository) error {
-	use, err := gc.db.DigestUseAnotherRepository()
+	use, err := gc.db.DigestUseAnotherRepository(repository.Digest)
 	if err != nil {
 		return err
 	}
 
 	if !use {
-		if err := gc.db.MarkDeleteDigest(repository.Digest); err != nil {
+		if err := gc.db.MarkDeleteDigest(nil, repository.Digest); err != nil {
 			return err
 		}
 	}

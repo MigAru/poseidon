@@ -1,4 +1,4 @@
-package upload
+package uploads
 
 import (
 	"github.com/MigAru/poseidon/internal/file_system"

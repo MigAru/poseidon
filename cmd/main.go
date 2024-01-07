@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/MigAru/poseidon/cmd/commands"
 	_ "github.com/MigAru/poseidon/cmd/commands/api"
-	_ "github.com/MigAru/poseidon/cmd/commands/gc"
 	_ "github.com/MigAru/poseidon/cmd/commands/migrate"
 	"github.com/spf13/cobra"
 )

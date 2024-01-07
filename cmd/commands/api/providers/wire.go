@@ -10,10 +10,13 @@ import (
 	"github.com/MigAru/poseidon/internal/config"
 	"github.com/MigAru/poseidon/internal/database"
 	"github.com/MigAru/poseidon/internal/file_system"
+	"github.com/MigAru/poseidon/internal/gin"
 	"github.com/MigAru/poseidon/internal/logger"
 	"github.com/MigAru/poseidon/internal/manifest"
 	"github.com/MigAru/poseidon/internal/ping"
-	"github.com/MigAru/poseidon/internal/upload"
+	"github.com/MigAru/poseidon/internal/tech"
+	"github.com/MigAru/poseidon/internal/uploads"
+	"github.com/MigAru/poseidon/pkg/http"
 	"github.com/MigAru/poseidon/pkg/registry/hasher"
 	"github.com/google/wire"
 )
@@ -27,12 +30,14 @@ func InitializeBackend(ctx context.Context) (Backend, func(), error) {
 		database.New,
 		file_system.New,
 		hasher.New,
-		upload.NewUploads,
-		ping.NewPingController,
+		uploads.NewUploads,
+		ping.NewController,
 		base.NewController,
 		blob.NewController,
 		manifest.NewController,
-		ServerProvider,
+		tech.NewController,
+		gin.NewServer,
+		wire.Bind(new(http.Server), new(*gin.Server)),
 		ServiceProvider,
 	))
 }

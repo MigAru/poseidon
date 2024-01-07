@@ -42,7 +42,7 @@ func (c *Controller) PutUpload(ctx http.Context) error {
 		return err
 	}
 
-	uploadURL := "/v2/" + project + "/blobs/upload/" + uuid
+	uploadURL := "/v2/" + project + "/blobs/uploads/" + uuid
 
 	headers := http.NewRegisryHeadersParams().WithLocation(uploadURL).WithRange(0, written).WithUUID(uuid)
 	ctx.SetHeaders(http.CreateRegistryHeaders(headers))
